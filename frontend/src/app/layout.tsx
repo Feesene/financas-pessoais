@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { CompetenciaProvider } from '@/components/competencia/CompetenciaProvider';
 import { Topbar } from '@/components/layout/Topbar';
 import './globals.css';
 
@@ -20,9 +21,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-screen antialiased">
         <ThemeProvider>
-          <Topbar />
-          <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">{children}</div>
-          <Toaster />
+          <CompetenciaProvider>
+            <Topbar />
+            <div className="flex min-h-[calc(100vh-3.5rem)] flex-col">{children}</div>
+            <Toaster />
+          </CompetenciaProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, AlertTriangle, Inbox } from 'lucide-react';
 import type {
   ConsumoCategoriaDTO,
@@ -11,7 +11,8 @@ import type {
 import { lancamentosApi } from '@/lib/api/lancamentos';
 import { categoriasApi } from '@/lib/api/categorias';
 import { recorrenciasApi } from '@/lib/api/recorrencias';
-import { competenciaAtual, competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
+import { competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,21 +25,19 @@ import { NavegacaoMeses } from './NavegacaoMeses';
 type Status = 'loading' | 'ready' | 'error';
 
 export function OrcamentoView() {
-  const router = useRouter();
-  const pathname = usePathname();
+  const { competencia, setCompetencia } = useCompetencia();
   const searchParams = useSearchParams();
-  const competenciaParam = searchParams.get('competencia');
-  const competencia =
-    competenciaParam && isCompetenciaValida(competenciaParam)
-      ? competenciaParam
-      : competenciaAtual();
 
-  const irParaCompetencia = useCallback(
-    (nova: string) => {
-      router.push(`${pathname}?competencia=${nova}`);
-    },
-    [router, pathname],
-  );
+  // Deep-link: na 1ª carga, ?competencia= válido alimenta o estado global (URL vence).
+  const overrideAplicado = useRef(false);
+  useEffect(() => {
+    if (overrideAplicado.current) return;
+    overrideAplicado.current = true;
+    const param = searchParams.get('competencia');
+    if (param && isCompetenciaValida(param) && param !== competencia) {
+      setCompetencia(param);
+    }
+  }, [searchParams, competencia, setCompetencia]);
 
   const [lancamentos, setLancamentos] = useState<LancamentoDTO[]>([]);
   const [resumo, setResumo] = useState<ResumoMensalDTO | null>(null);
@@ -81,7 +80,7 @@ export function OrcamentoView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <NavegacaoMeses competencia={competencia} onSelecionar={irParaCompetencia} />
+          <NavegacaoMeses />
           <LancamentoFormDialog
             competencia={competencia}
             onSalvo={carregar}

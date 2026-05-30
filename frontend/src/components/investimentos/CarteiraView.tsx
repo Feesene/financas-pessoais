@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, History, Plus, TrendingUp } from 'lucide-react';
 import type { AtivoDTO, PosicaoCarteiraDTO, SubtotalTipoDTO, TipoAtivo } from '@financas-pessoais/shared';
 import { investimentosApi } from '@/lib/api/investimentos';
-import { competenciaAtual } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
 import { TIPO_ATIVO_LABEL } from '@/lib/investimentos';
 import { Button } from '@/components/ui/button';
@@ -19,9 +19,9 @@ type Status = 'loading' | 'ready' | 'error';
 const ORDEM_TIPOS: TipoAtivo[] = ['ACAO', 'FII', 'FUNDO'];
 
 export function CarteiraView() {
+  const { competencia } = useCompetencia();
   const [posicao, setPosicao] = useState<PosicaoCarteiraDTO | null>(null);
   const [status, setStatus] = useState<Status>('loading');
-  const competencia = competenciaAtual();
 
   const carregar = useCallback(async () => {
     setStatus('loading');

@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -37,12 +37,8 @@ import { relatoriosApi } from '@/lib/api/relatorios';
 import { reservasApi } from '@/lib/api/reservas';
 import { investimentosApi } from '@/lib/api/investimentos';
 import { recorrenciasApi } from '@/lib/api/recorrencias';
-import {
-  competenciaAtual,
-  competenciaLabel,
-  isCompetenciaValida,
-  mesAnterior,
-} from '@/lib/competencia';
+import { competenciaLabel, isCompetenciaValida, mesAnterior } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -75,19 +71,19 @@ function subtrairMeses(competencia: string, n: number): string {
 }
 
 export function DashboardView() {
-  const router = useRouter();
-  const pathname = usePathname();
+  const { competencia, setCompetencia } = useCompetencia();
   const searchParams = useSearchParams();
-  const competenciaParam = searchParams.get('competencia');
-  const competencia =
-    competenciaParam && isCompetenciaValida(competenciaParam)
-      ? competenciaParam
-      : competenciaAtual();
 
-  const irParaCompetencia = useCallback(
-    (nova: string) => router.push(`${pathname}?competencia=${nova}`),
-    [router, pathname],
-  );
+  // Deep-link: na 1ª carga, ?competencia= válido alimenta o estado global (URL vence).
+  const overrideAplicado = useRef(false);
+  useEffect(() => {
+    if (overrideAplicado.current) return;
+    overrideAplicado.current = true;
+    const param = searchParams.get('competencia');
+    if (param && isCompetenciaValida(param) && param !== competencia) {
+      setCompetencia(param);
+    }
+  }, [searchParams, competencia, setCompetencia]);
 
   const [dados, setDados] = useState<DashboardData | null>(null);
   const [status, setStatus] = useState<Status>('loading');
@@ -126,7 +122,7 @@ export function DashboardView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <NavegacaoMeses competencia={competencia} onSelecionar={irParaCompetencia} />
+          <NavegacaoMeses />
           {dados && (
             <LancamentoFormDialog
               competencia={competencia}

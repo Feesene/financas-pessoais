@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, PiggyBank, Plus } from 'lucide-react';
 import type { SaldoBaldeDTO } from '@financas-pessoais/shared';
 import { reservasApi } from '@/lib/api/reservas';
-import { competenciaAtual } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import { BaldeFormDialog } from './BaldeFormDialog';
 type Status = 'loading' | 'ready' | 'error';
 
 export function ReservasView() {
-  const [competencia, setCompetencia] = useState(competenciaAtual);
+  const { competencia } = useCompetencia();
   const [baldes, setBaldes] = useState<SaldoBaldeDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState<Status>('loading');
@@ -47,7 +47,7 @@ export function ReservasView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <NavegacaoMeses competencia={competencia} onSelecionar={setCompetencia} />
+          <NavegacaoMeses />
           <BaldeFormDialog
             onSalvo={carregar}
             trigger={

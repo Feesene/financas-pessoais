@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Plus, Tag } from 'lucide-react';
 import type { CategoriaDTO, TipoLancamento } from '@financas-pessoais/shared';
 import { categoriasApi } from '@/lib/api/categorias';
-import { competenciaAtual } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,7 +22,7 @@ const ROTULO_TIPO: Record<TipoLancamento, string> = {
 const ORDEM_TIPOS: TipoLancamento[] = ['DESPESA', 'RECEITA'];
 
 export function CategoriasView() {
-  const [competencia, setCompetencia] = useState(competenciaAtual);
+  const { competencia } = useCompetencia();
   const [categorias, setCategorias] = useState<CategoriaDTO[]>([]);
   const [metaPorCategoria, setMetaPorCategoria] = useState<Map<string, number>>(new Map());
   const [status, setStatus] = useState<Status>('loading');
@@ -60,7 +60,7 @@ export function CategoriasView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <NavegacaoMeses competencia={competencia} onSelecionar={setCompetencia} />
+          <NavegacaoMeses />
           <CategoriaFormDialog
             onSalvo={carregar}
             trigger={

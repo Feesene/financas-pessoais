@@ -1,7 +1,8 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { competenciaAtual, mesAnterior, mesSeguinte, parseCompetencia } from '@/lib/competencia';
+import { competenciaAtual, parseCompetencia } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -26,16 +27,12 @@ const MESES = [
   'Dezembro',
 ];
 
-interface Props {
-  competencia: string;
-  onSelecionar: (competencia: string) => void;
-}
-
 function formatar(ano: number, mes: number): string {
   return `${ano}-${String(mes).padStart(2, '0')}`;
 }
 
-export function NavegacaoMeses({ competencia, onSelecionar }: Props) {
+export function NavegacaoMeses() {
+  const { competencia, setCompetencia, irMesAnterior, irMesSeguinte } = useCompetencia();
   const { ano, mes } = parseCompetencia(competencia);
   const anoBase = parseCompetencia(competenciaAtual()).ano;
   const anos: number[] = [];
@@ -53,12 +50,12 @@ export function NavegacaoMeses({ competencia, onSelecionar }: Props) {
         variant="outline"
         size="icon"
         aria-label="Mês anterior"
-        onClick={() => onSelecionar(mesAnterior(competencia))}
+        onClick={irMesAnterior}
       >
         <ChevronLeft />
       </Button>
 
-      <Select value={String(mes)} onValueChange={(v) => onSelecionar(formatar(ano, Number(v)))}>
+      <Select value={String(mes)} onValueChange={(v) => setCompetencia(formatar(ano, Number(v)))}>
         <SelectTrigger aria-label="Mês" className="w-[8.5rem]">
           <SelectValue />
         </SelectTrigger>
@@ -71,7 +68,7 @@ export function NavegacaoMeses({ competencia, onSelecionar }: Props) {
         </SelectContent>
       </Select>
 
-      <Select value={String(ano)} onValueChange={(v) => onSelecionar(formatar(Number(v), mes))}>
+      <Select value={String(ano)} onValueChange={(v) => setCompetencia(formatar(Number(v), mes))}>
         <SelectTrigger aria-label="Ano" className="w-[5.5rem]">
           <SelectValue />
         </SelectTrigger>
@@ -88,7 +85,7 @@ export function NavegacaoMeses({ competencia, onSelecionar }: Props) {
         variant="outline"
         size="icon"
         aria-label="Mês seguinte"
-        onClick={() => onSelecionar(mesSeguinte(competencia))}
+        onClick={irMesSeguinte}
       >
         <ChevronRight />
       </Button>
