@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CreditCard, Pencil, Repeat, Square } from 'lucide-react';
+import { CreditCard, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CategoriaDTO, RegraRecorrenteDTO } from '@financas-pessoais/shared';
 import { recorrenciasApi } from '@/lib/api/recorrencias';
@@ -114,7 +114,7 @@ export function RecorrenciaItem({ regra, categoria, categorias, onAlterado }: Pr
                 disabled={encerrando}
                 className="text-muted-foreground hover:text-destructive"
               >
-                <Square />
+                <Trash2 />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

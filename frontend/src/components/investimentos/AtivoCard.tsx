@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { CircleDollarSign, LineChart, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AtivoDTO } from '@financas-pessoais/shared';
 import { investimentosApi } from '@/lib/api/investimentos';
@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AtivoFormDialog } from './AtivoFormDialog';
 import { MovimentoCarteiraFormDialog } from './MovimentoCarteiraFormDialog';
+import { CotacaoFormDialog } from './CotacaoFormDialog';
+import { EvolucaoAtivoDialog } from './EvolucaoAtivoDialog';
 
 interface Props {
   ativo: AtivoDTO;
@@ -69,6 +71,29 @@ export function AtivoCard({ ativo, competencia, onAlterado }: Props) {
       <div className="flex items-center gap-2">
         <span className="text-lg font-semibold tabular-nums">{formatarReais(ativo.valorBruto)}</span>
         <div className="flex items-center">
+          <CotacaoFormDialog
+            ativo={ativo}
+            competenciaInicial={competencia}
+            onSalvo={onAlterado}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Registrar cotação"
+                title="Registrar cotação"
+              >
+                <CircleDollarSign />
+              </Button>
+            }
+          />
+          <EvolucaoAtivoDialog
+            ativo={ativo}
+            trigger={
+              <Button variant="ghost" size="icon" aria-label="Ver evolução" title="Ver evolução">
+                <LineChart />
+              </Button>
+            }
+          />
           <MovimentoCarteiraFormDialog
             ativo={ativo}
             competenciaInicial={competencia}

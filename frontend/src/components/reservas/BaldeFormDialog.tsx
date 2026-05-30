@@ -24,6 +24,7 @@ const PALETA = [
   '#ef4444',
   '#f97316',
   '#f59e0b',
+  '#f5ff2b',
   '#84cc16',
   '#22c55e',
   '#14b8a6',
@@ -31,8 +32,9 @@ const PALETA = [
   '#6366f1',
   '#a855f7',
   '#ec4899',
+  '#202020',
+  '#d4d4d4',
 ];
-
 interface Props {
   /** Quando presente, o diálogo opera em modo edição. */
   balde?: BaldeDTO;

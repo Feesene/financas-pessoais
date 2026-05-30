@@ -1,8 +1,11 @@
 import type {
   AtivoDTO,
+  CotacaoAtivoDTO,
+  EvolucaoAtivoItemDTO,
   HistoricoCarteiraItemDTO,
   MovimentoCarteiraDTO,
   PosicaoCarteiraDTO,
+  RegistrarCotacaoDTO,
   TipoAtivo,
   TipoMovimentoCarteira,
 } from '@financas-pessoais/shared';
@@ -82,5 +85,34 @@ export const investimentosApi = {
 
   excluirMovimento(id: string): Promise<void> {
     return request<void>(`/movimentos-carteira/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  },
+
+  registrarCotacao(
+    ativoId: string,
+    competencia: string,
+    body: RegistrarCotacaoDTO,
+  ): Promise<CotacaoAtivoDTO> {
+    return request<CotacaoAtivoDTO>(
+      `/ativos/${encodeURIComponent(ativoId)}/cotacoes/${encodeURIComponent(competencia)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(body),
+      },
+    );
+  },
+
+  listarCotacoes(ativoId: string): Promise<CotacaoAtivoDTO[]> {
+    return request<CotacaoAtivoDTO[]>(`/ativos/${encodeURIComponent(ativoId)}/cotacoes`);
+  },
+
+  obterEvolucao(ativoId: string): Promise<EvolucaoAtivoItemDTO[]> {
+    return request<EvolucaoAtivoItemDTO[]>(`/ativos/${encodeURIComponent(ativoId)}/evolucao`);
+  },
+
+  excluirCotacao(ativoId: string, competencia: string): Promise<void> {
+    return request<void>(
+      `/ativos/${encodeURIComponent(ativoId)}/cotacoes/${encodeURIComponent(competencia)}`,
+      { method: 'DELETE' },
+    );
   },
 };

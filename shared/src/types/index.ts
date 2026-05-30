@@ -230,6 +230,38 @@ export interface HistoricoCarteiraItemDTO {
   fluxoLiquido: number;
 }
 
+/** Snapshot do preço/valor de um ativo numa competência (histórico de cotações). */
+export interface CotacaoAtivoDTO {
+  id: string;
+  ativoId: string;
+  /** Mês de competência no formato AAAA-MM. */
+  competencia: string;
+  /** Preço unitário do mês (ACAO/FII); null para fundos. */
+  valorUnitario: number | null;
+  /** Valor bruto do mês (FUNDO); null para ações/FIIs. */
+  valorBruto: number | null;
+}
+
+/** Corpo do registro (upsert) de uma cotação de ativo por competência. */
+export interface RegistrarCotacaoDTO {
+  /** ACAO/FII. */
+  valorUnitario?: number | null;
+  /** FUNDO. */
+  valorBruto?: number | null;
+}
+
+/** Ponto da evolução do valor de um ativo por competência. */
+export interface EvolucaoAtivoItemDTO {
+  /** Mês de competência no formato AAAA-MM. */
+  competencia: string;
+  /** ACAO/FII (preço do mês). */
+  valorUnitario: number | null;
+  /** FUNDO (valor do mês). */
+  valorBruto: number | null;
+  /** Valor bruto efetivo no mês: ACAO/FII = quantidade×valorUnitario; FUNDO = valorBruto. */
+  valorBrutoEfetivo: number;
+}
+
 // ----------------------------------------------------------------------------
 // Relatórios e histórico (P5) — DTOs de leitura/agregação (nada persistido).
 // ----------------------------------------------------------------------------

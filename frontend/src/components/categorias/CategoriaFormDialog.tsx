@@ -31,6 +31,7 @@ const PALETA = [
   '#ef4444',
   '#f97316',
   '#f59e0b',
+  '#f5ff2b',
   '#84cc16',
   '#22c55e',
   '#14b8a6',
@@ -38,6 +39,8 @@ const PALETA = [
   '#6366f1',
   '#a855f7',
   '#ec4899',
+  '#202020',
+  '#d4d4d4',
 ];
 
 interface Props {
@@ -146,7 +149,9 @@ export function CategoriaFormDialog({ categoria, trigger, onSalvo }: Props) {
                   onClick={() => setCor(c)}
                   className={cn(
                     'flex h-7 w-7 items-center justify-center rounded-full border transition-transform hover:scale-110',
-                    cor?.toLowerCase() === c ? 'ring-2 ring-ring ring-offset-2 ring-offset-background' : '',
+                    cor?.toLowerCase() === c
+                      ? 'ring-2 ring-ring ring-offset-2 ring-offset-background'
+                      : '',
                   )}
                   style={{ backgroundColor: c }}
                 >

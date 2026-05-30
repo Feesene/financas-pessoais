@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import type { LancamentoDTO, TipoLancamento } from '@financas-pessoais/shared';
+import type { CategoriaDTO, LancamentoDTO, TipoLancamento } from '@financas-pessoais/shared';
 import { lancamentosApi } from '@/lib/api/lancamentos';
-import { CATEGORIAS_SUGERIDAS } from '@/lib/categorias';
+import { categoriasApi } from '@/lib/api/categorias';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -34,28 +34,81 @@ interface Props {
   onSalvo: () => void;
 }
 
+/** Valor sentinela do seletor para o modo de texto livre ("Outra"). */
+const OUTRA = '__outra__';
+
 export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo }: Props) {
   const edicao = Boolean(lancamento);
   const [aberto, setAberto] = useState(false);
   const [tipo, setTipo] = useState<TipoLancamento>(lancamento?.tipo ?? 'DESPESA');
-  const [categoria, setCategoria] = useState(lancamento?.categoria ?? '');
+  /** Valor atual do seletor: id de uma categoria cadastrada, OUTRA, ou '' (nada escolhido). */
+  const [selecao, setSelecao] = useState('');
+  /** Nome digitado no modo texto livre. */
+  const [categoriaTexto, setCategoriaTexto] = useState(lancamento?.categoria ?? '');
   const [descricao, setDescricao] = useState(lancamento?.descricao ?? '');
   const [valor, setValor] = useState(lancamento ? String(lancamento.valor) : '');
   const [enviando, setEnviando] = useState(false);
+  const [categorias, setCategorias] = useState<CategoriaDTO[]>([]);
+
+  const categoriasDoTipo = useMemo(
+    () => categorias.filter((c) => c.tipo === tipo),
+    [categorias, tipo],
+  );
+  const semCategorias = categoriasDoTipo.length === 0;
+  /** Texto livre quando não há categorias do tipo (T5) ou quando "Outra" foi escolhida (T3). */
+  const modoTextoLivre = semCategorias || selecao === OUTRA;
+
+  const categoriaSelecionada = categoriasDoTipo.find((c) => c.id === selecao) ?? null;
+  const categoriaNome = modoTextoLivre ? categoriaTexto.trim() : (categoriaSelecionada?.nome ?? '');
+  const categoriaId = categoriaSelecionada?.id ?? null;
 
   const valorNumerico = Number(valor);
-  const valido = categoria.trim().length > 0 && valor !== '' && valorNumerico > 0;
+  const valido = categoriaNome.length > 0 && valor !== '' && valorNumerico > 0;
 
   function resetar() {
     setTipo(lancamento?.tipo ?? 'DESPESA');
-    setCategoria(lancamento?.categoria ?? '');
+    setSelecao('');
+    setCategoriaTexto(lancamento?.categoria ?? '');
     setDescricao(lancamento?.descricao ?? '');
     setValor(lancamento ? String(lancamento.valor) : '');
   }
 
   function aoMudarAbertura(estado: boolean) {
     setAberto(estado);
-    if (estado) resetar();
+    if (estado) {
+      resetar();
+      categoriasApi
+        .listar()
+        .then(setCategorias)
+        .catch(() => setCategorias([]));
+    }
+  }
+
+  // Pré-seleção em modo edição assim que as categorias chegam (T4): casa pelo id;
+  // se o id não existir mais (categoria excluída) cai em "Outra" preservando o nome.
+  useEffect(() => {
+    if (!aberto || !lancamento) return;
+    if (lancamento.categoriaId && categorias.some((c) => c.id === lancamento.categoriaId)) {
+      setSelecao(lancamento.categoriaId);
+    } else {
+      setSelecao(OUTRA);
+      setCategoriaTexto(lancamento.categoria ?? '');
+    }
+  }, [aberto, lancamento, categorias]);
+
+  function aoMudarTipo(novoTipo: TipoLancamento) {
+    setTipo(novoTipo);
+    // Invalida a seleção incompatível com o novo tipo (T3/RF-004).
+    setSelecao((atual) => {
+      if (atual === OUTRA) return atual;
+      const aindaValida = categorias.some((c) => c.id === atual && c.tipo === novoTipo);
+      return aindaValida ? atual : '';
+    });
+  }
+
+  function aoMudarSelecao(valorSel: string) {
+    setSelecao(valorSel);
+    if (valorSel === OUTRA) setCategoriaTexto('');
   }
 
   async function submeter(event: React.FormEvent) {
@@ -64,7 +117,8 @@ export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo
     setEnviando(true);
     const corpo = {
       tipo,
-      categoria: categoria.trim(),
+      categoria: categoriaNome,
+      categoriaId,
       descricao: descricao.trim() || null,
       valor: Number(valorNumerico.toFixed(2)),
       competencia: lancamento?.competencia ?? competencia,
@@ -102,7 +156,7 @@ export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo
         <form id="form-lancamento" onSubmit={submeter} className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label htmlFor="tipo">Tipo</Label>
-            <Select value={tipo} onValueChange={(v) => setTipo(v as TipoLancamento)}>
+            <Select value={tipo} onValueChange={(v) => aoMudarTipo(v as TipoLancamento)}>
               <SelectTrigger id="tipo">
                 <SelectValue />
               </SelectTrigger>
@@ -115,20 +169,48 @@ export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo
 
           <div className="grid gap-2">
             <Label htmlFor="categoria">Categoria</Label>
-            <Input
-              id="categoria"
-              list="categorias-sugeridas"
-              value={categoria}
-              maxLength={80}
-              onChange={(e) => setCategoria(e.target.value)}
-              placeholder="Ex.: Alimentação"
-              autoComplete="off"
-            />
-            <datalist id="categorias-sugeridas">
-              {CATEGORIAS_SUGERIDAS.map((c) => (
-                <option key={c} value={c} />
-              ))}
-            </datalist>
+            {semCategorias ? (
+              <>
+                <Input
+                  id="categoria"
+                  value={categoriaTexto}
+                  maxLength={80}
+                  onChange={(e) => setCategoriaTexto(e.target.value)}
+                  placeholder="Ex.: Alimentação"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Nenhuma categoria de {tipo === 'DESPESA' ? 'despesa' : 'receita'} cadastrada.
+                  Cadastre categorias para vincular e acompanhar metas.
+                </p>
+              </>
+            ) : (
+              <>
+                <Select value={selecao} onValueChange={aoMudarSelecao}>
+                  <SelectTrigger id="categoria">
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriasDoTipo.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.nome}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={OUTRA}>Outra (digitar)</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selecao === OUTRA && (
+                  <Input
+                    id="categoria-texto"
+                    value={categoriaTexto}
+                    maxLength={80}
+                    onChange={(e) => setCategoriaTexto(e.target.value)}
+                    placeholder="Ex.: Alimentação"
+                    autoComplete="off"
+                  />
+                )}
+              </>
+            )}
           </div>
 
           <div className="grid gap-2">
