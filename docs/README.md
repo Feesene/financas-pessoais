@@ -15,6 +15,8 @@ Esta pasta concentra a documentação técnica do projeto, seguindo o fluxo de *
 - Cada feature tem uma pasta própria em `.speckit/features/{slug}/` com `_prd.md` e `_spec.md`.
 - `{slug}` em kebab-case, sem acentos (ex.: `orcamento-mensal`); se houver ticket, inclua-o (`142-...`).
 - A Spec referencia o PRD correspondente no cabeçalho.
+- O frontend de toda feature segue o design system documentado em [ui-frontend.md](./ui-frontend.md)
+  (Tailwind + shadcn/ui, modais, toasts, gráficos).
 
 ## Estrutura do projeto
 

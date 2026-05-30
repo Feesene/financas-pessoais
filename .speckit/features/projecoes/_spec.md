@@ -136,26 +136,26 @@ export interface CenarioProjecaoDTO {
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `ProjecaoParametrosDTO`, `ProjecaoAnoDTO`, `ProjecaoResultadoDTO`, `CenarioProjecaoDTO`.
+- [x] T1 — Tipos `ProjecaoParametrosDTO`, `ProjecaoAnoDTO`, `ProjecaoResultadoDTO`, `CenarioProjecaoDTO`.
 
 **Backend — módulo projecoes**
-- [ ] T2 — Função/serviço de domínio puro de juros compostos (taxa mensal equivalente, iteração mês a mês,
+- [x] T2 — Função/serviço de domínio puro de juros compostos (taxa mensal equivalente, iteração mês a mês,
   agregação anual). *(T1)*
-- [ ] T3 — `CalcularProjecaoUseCase` (valida parâmetros + monta `ProjecaoResultadoDTO`). *(T2)*
+- [x] T3 — `CalcularProjecaoUseCase` (valida parâmetros + monta `ProjecaoResultadoDTO`). *(T2)*
 - [ ] T4 — *(opcional RF-008)* Domínio `CenarioProjecao` + repo interface + infra TypeORM + use cases
   salvar/listar/excluir. *(T1)*
-- [ ] T5 — `ProjecoesModule` + controller (`POST /projecoes/calcular` + rotas de cenário se T4). *(T3,T4)*
+- [x] T5 — `ProjecoesModule` + controller (`POST /projecoes/calcular` + rotas de cenário se T4). *(T3,T4)*
 
 **Frontend**
-- [ ] T6 — Cliente de API de projeções. *(T5)*
-- [ ] T7 — Formulário de parâmetros (entrada, aporte, taxa, anos) com recálculo reativo. *(T6)*
-- [ ] T8 — Tabela ano a ano + cartões de total final e juros ganhos. *(T7)*
-- [ ] T9 — Gráfico comparativo investido vs não investido. *(T8)*
+- [x] T6 — Cliente de API de projeções. *(T5)*
+- [x] T7 — Formulário de parâmetros (entrada, aporte, taxa, anos) com recálculo reativo. *(T6)*
+- [x] T8 — Tabela ano a ano + cartões de total final e juros ganhos. *(T7)*
+- [x] T9 — Gráfico comparativo investido vs não investido. *(T8)*
 - [ ] T10 — *(opcional)* Pré-preencher Entrada com total da carteira (P6) + salvar/abrir cenários. *(T7)*
 
 **Testes**
-- [ ] T11 — Unitários do cálculo (referência, taxa 0, aporte 0, entrada 0, juros ganhos). *(T2)*
-- [ ] T12 — e2e de `POST /calcular` + validações (e CRUD de cenário se T4). *(T5)*
+- [x] T11 — Unitários do cálculo (referência, taxa 0, aporte 0, entrada 0, juros ganhos). *(T2)*
+- [x] T12 — e2e de `POST /calcular` + validações (e CRUD de cenário se T4). *(T5)*
 
 ## 11. Decisões e premissas
 

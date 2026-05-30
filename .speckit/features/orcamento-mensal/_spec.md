@@ -134,6 +134,9 @@ export interface AtualizarLancamentoDTO {
 - **RF-007** — O frontend **DEVERIA** formatar valores em R$ (pt-BR) e destacar saldo negativo.
 - **RF-008** — O frontend **DEVERIA** exibir estado vazio quando a competência não tem lançamentos.
 - **RF-009** — O sistema **PODE** sugerir categorias a partir de uma lista padrão (seed estático no frontend).
+- **RF-010** — O frontend **DEVE** seguir o design system ([`docs/ui-frontend.md`](../../../docs/ui-frontend.md)):
+  Tailwind + shadcn/ui, **criação e edição em modal** (`Dialog`), **exclusão com `AlertDialog` de confirmação**,
+  **avisos via `toast`** (`sonner`) e estados de **loading (skeleton)**, **vazio** e **erro com retry**.
 
 ## 7. Requisitos não-funcionais
 
@@ -201,6 +204,16 @@ export interface AtualizarLancamentoDTO {
 - [x] T14 — Navegação entre meses (botões e seletor mês/ano) sincronizada com a URL. *(depende de T11)*
 - [x] T15 — Estado vazio e destaque de saldo negativo. *(depende de T12)*
 
+**Frontend — design system (refatoração P1.1)**
+- [x] T18 — Adotar **Tailwind + shadcn/ui**: setup (tailwind/postcss/components.json, alias `@/*`, tokens de
+  tema em `globals.css`) e primitivos em `components/ui` (button, card, dialog, alert-dialog, input, label,
+  select, sonner, skeleton, badge). `<Toaster />` no `layout.tsx`.
+- [x] T19 — Criação e edição em **modal** via `LancamentoFormDialog` (form único, modo criar/editar);
+  exclusão com **`AlertDialog`** de confirmação. *(refatora T12/T13)*
+- [x] T20 — Feedback de mutação via **`toast`** (`sonner`); **skeleton** de loading e **estado de erro** com
+  botão "Tentar novamente". *(refatora T11/T13)*
+- [x] T21 — Cartões de totais e navegação de meses recompostos com `Card`/`Button`/`Select`. *(refatora T12/T14)*
+
 **Testes**
 - [x] T16 — Testes unitários de domínio e dos casos de uso (editar/excluir/resumo). *(depende de T4, T5, T6)*
 - [x] T17 — Teste e2e do ciclo de vida do lançamento + resumo numa competência. *(depende de T7, T8)*
@@ -216,3 +229,7 @@ export interface AtualizarLancamentoDTO {
   no MVP.
 - **D5** — Sem soft-delete: `DELETE` remove a linha. Histórico/auditoria não é requisito do MVP.
 - **D6** — `competencia` é o mês de referência; sem data exata do lançamento em P1 (premissa do PRD).
+- **D7** — **Design system**: adotado **Tailwind + shadcn/ui** (Radix) como padrão de UI do projeto, com
+  `sonner` (toasts), `lucide-react` (ícones) e `recharts` (gráficos). Criação/edição em `Dialog`, exclusão em
+  `AlertDialog`, feedback em `toast`. Convenções em [`docs/ui-frontend.md`](../../../docs/ui-frontend.md); este
+  módulo é a implementação de referência para P2–P7.

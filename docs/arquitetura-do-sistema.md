@@ -6,6 +6,8 @@
 pacotes:
 
 - **`frontend/`** — aplicação Next.js (App Router) + React, em TypeScript. Camada de interface, desktop-first.
+  Estilização com **Tailwind CSS** e componentes **shadcn/ui** (sobre Radix UI); toasts com `sonner`, ícones
+  `lucide-react`, gráficos `recharts`. Convenções de UI/UX na doc canônica [UI / Frontend](./ui-frontend.md).
 - **`backend/`** — API NestJS com TypeORM e PostgreSQL, em TypeScript. Concentra as regras de negócio,
   organizada em **DDD + Clean Architecture**, com um módulo por domínio.
 - **`shared/`** — pacote `@financas-pessoais/shared` com tipos/contratos usados por frontend e backend (ex.:
@@ -91,6 +93,8 @@ no Postgres. O contrato de resposta (`LancamentoDTO`) vem de `@financas-pessoais
 - **TypeORM 0.3** + **pg** — persistência em PostgreSQL 16 (via docker-compose).
 - **class-validator / class-transformer** — validação dos DTOs HTTP.
 - **Next.js 14 / React 18** — frontend.
+- **Tailwind CSS 3 + shadcn/ui (Radix UI)** — design system do frontend; `sonner` (toasts), `lucide-react`
+  (ícones), `recharts` (gráficos). Ver [docs/ui-frontend.md](./ui-frontend.md).
 - **Docker / docker-compose** — provisiona o PostgreSQL local.
 
 ## Riscos técnicos e pontos de atenção
@@ -108,6 +112,10 @@ no Postgres. O contrato de resposta (`LancamentoDTO`) vem de `@financas-pessoais
 
 - Cada novo módulo do MVP (P2–P7) deve seguir a **mesma estrutura de quatro camadas** do módulo `lancamentos`,
   que serve de referência canônica.
+- O **frontend** de cada feature deve seguir o design system em [docs/ui-frontend.md](./ui-frontend.md):
+  Tailwind + shadcn/ui, criação/edição em modais (`Dialog`), confirmação de exclusão (`AlertDialog`), avisos
+  via `toast` (`sonner`), estados de loading/vazio/erro e gráficos com `recharts`. O módulo
+  `frontend/src/components/orcamento` é a implementação de referência.
 - Tipos expostos pela API devem ser declarados em `shared/` antes de implementar os dois lados.
 - Manter o domínio livre de framework; toda integração externa entra via port + adapter na infraestrutura.
 - Seguir o fluxo **Spec Driven Development** (PRD → Spec → execução) por feature — ver [docs/README](./README.md).

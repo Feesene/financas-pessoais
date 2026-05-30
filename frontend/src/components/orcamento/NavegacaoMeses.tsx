@@ -1,12 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import {
-  competenciaAtual,
-  mesAnterior,
-  mesSeguinte,
-  parseCompetencia,
-} from '@/lib/competencia';
+import { competenciaAtual, mesAnterior, mesSeguinte, parseCompetencia } from '@/lib/competencia';
 import { Button } from '@/components/ui/button';
 import {
   Select,

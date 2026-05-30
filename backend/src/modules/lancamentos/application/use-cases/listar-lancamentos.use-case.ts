@@ -17,9 +17,12 @@ export class ListarLancamentosUseCase {
       id: l.id,
       tipo: l.tipo,
       categoria: l.categoria,
+      categoriaId: l.categoriaId,
       descricao: l.descricao,
       valor: l.valor,
       competencia: l.competencia,
+      origemRegraId: l.origemRegraId,
+      ocorrenciaIndice: l.ocorrenciaIndice,
     }));
   }
 }

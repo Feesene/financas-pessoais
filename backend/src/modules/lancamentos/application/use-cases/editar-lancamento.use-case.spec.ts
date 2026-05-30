@@ -2,14 +2,17 @@ import { EditarLancamentoUseCase } from './editar-lancamento.use-case';
 import { Lancamento } from '../../domain/entities/lancamento';
 import { LancamentoNaoEncontradoError } from '../errors/lancamento-nao-encontrado.error';
 import { InMemoryLancamentoRepository } from '../../../../../test/in-memory-lancamento.repository';
+import { InMemoryCategoriaRepository } from '../../../../../test/in-memory-categoria.repository';
 
 describe('EditarLancamentoUseCase', () => {
   let repo: InMemoryLancamentoRepository;
+  let categorias: InMemoryCategoriaRepository;
   let useCase: EditarLancamentoUseCase;
 
   beforeEach(() => {
     repo = new InMemoryLancamentoRepository();
-    useCase = new EditarLancamentoUseCase(repo);
+    categorias = new InMemoryCategoriaRepository();
+    useCase = new EditarLancamentoUseCase(repo, categorias);
   });
 
   it('lança erro quando o lançamento não existe', async () => {
@@ -30,6 +33,7 @@ describe('EditarLancamentoUseCase', () => {
         id: 'l-1',
         tipo: 'DESPESA',
         categoria: 'Alimentação',
+        categoriaId: null,
         descricao: null,
         valor: 50,
         competencia: '2026-05',
@@ -49,9 +53,12 @@ describe('EditarLancamentoUseCase', () => {
       id: 'l-1',
       tipo: 'RECEITA',
       categoria: 'Salário',
+      categoriaId: null,
       descricao: 'Mensal',
       valor: 4000,
       competencia: '2026-05',
+      origemRegraId: null,
+      ocorrenciaIndice: null,
     });
 
     const persistido = await repo.findById('l-1');

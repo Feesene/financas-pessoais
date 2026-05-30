@@ -1,4 +1,4 @@
-import { IsIn, IsNumber, IsOptional, IsString, Matches, MaxLength, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, IsUUID, Matches, MaxLength, Min } from 'class-validator';
 import type { TipoLancamento } from '@financas-pessoais/shared';
 
 export class CriarLancamentoRequest {
@@ -8,6 +8,10 @@ export class CriarLancamentoRequest {
   @IsString()
   @MaxLength(80)
   categoria!: string;
+
+  @IsOptional()
+  @IsUUID()
+  categoriaId?: string;
 
   @IsOptional()
   @IsString()

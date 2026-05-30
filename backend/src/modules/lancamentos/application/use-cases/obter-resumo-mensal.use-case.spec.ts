@@ -7,6 +7,7 @@ function lancamento(overrides: Partial<LancamentoProps>): Lancamento {
     id: Math.random().toString(36).slice(2),
     tipo: 'DESPESA',
     categoria: 'Geral',
+    categoriaId: null,
     descricao: null,
     valor: 10,
     competencia: '2026-05',

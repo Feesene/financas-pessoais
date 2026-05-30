@@ -105,27 +105,27 @@ export interface SaldosReservaDTO { competencia: string | null; baldes: SaldoBal
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `TipoMovimentoReserva`, `BaldeDTO`, `MovimentoReservaDTO`, `SaldoBaldeDTO`, `SaldosReservaDTO`.
+- [x] T1 — Tipos `TipoMovimentoReserva`, `BaldeDTO`, `MovimentoReservaDTO`, `SaldoBaldeDTO`, `SaldosReservaDTO`.
 
 **Backend — módulo reservas**
-- [ ] T2 — Domínio `Balde` (entidade + repo interface). *(T1)*
-- [ ] T3 — Domínio `MovimentoReserva` (entidade + repo interface). *(T1)*
-- [ ] T4 — Infra TypeORM (schemas, mappers, repos) + índices. *(T2,T3)*
-- [ ] T5 — Use cases CRUD de balde (excluir bloqueia se houver movimentos). *(T4)*
-- [ ] T6 — Use cases registrar/editar/excluir movimento. *(T4)*
-- [ ] T7 — `ObterSaldosUseCase` (por balde + total, com carry-over). *(T4)*
-- [ ] T8 — `ObterEvolucaoBaldeUseCase` (cumulativo por competência). *(T4)*
-- [ ] T9 — `ReservasModule` + controllers (rotas seção 5). *(T5,T6,T7,T8)*
+- [x] T2 — Domínio `Balde` (entidade + repo interface). *(T1)*
+- [x] T3 — Domínio `MovimentoReserva` (entidade + repo interface). *(T1)*
+- [x] T4 — Infra TypeORM (schemas, mappers, repos) + índices. *(T2,T3)*
+- [x] T5 — Use cases CRUD de balde (excluir bloqueia se houver movimentos). *(T4)*
+- [x] T6 — Use cases registrar/editar/excluir movimento. *(T4)*
+- [x] T7 — `ObterSaldosUseCase` (por balde + total, com carry-over). *(T4)*
+- [x] T8 — `ObterEvolucaoBaldeUseCase` (cumulativo por competência). *(T4)*
+- [x] T9 — `ReservasModule` + controllers (rotas seção 5). *(T5,T6,T7,T8)*
 
 **Frontend**
-- [ ] T10 — Cliente de API de reservas. *(T9)*
-- [ ] T11 — Tela de reservas: cards por balde + total + CRUD de balde. *(T10)*
-- [ ] T12 — Formulário de movimento (aporte/retirada) com competência. *(T10)*
-- [ ] T13 — Gráfico de evolução por balde + aviso de saldo negativo. *(T11)*
+- [x] T10 — Cliente de API de reservas. *(T9)*
+- [x] T11 — Tela de reservas: cards por balde + total + CRUD de balde. *(T10)*
+- [x] T12 — Formulário de movimento (aporte/retirada) com competência. *(T10)*
+- [x] T13 — Gráfico de evolução por balde + aviso de saldo negativo. *(T11)*
 
 **Testes**
-- [ ] T14 — Unitários de saldo/evolução. *(T7,T8)*
-- [ ] T15 — e2e de movimentos, carry-over e exclusões. *(T9)*
+- [x] T14 — Unitários de saldo/evolução. *(T7,T8)*
+- [x] T15 — e2e de movimentos, carry-over e exclusões. *(T9)*
 
 ## 11. Decisões e premissas
 

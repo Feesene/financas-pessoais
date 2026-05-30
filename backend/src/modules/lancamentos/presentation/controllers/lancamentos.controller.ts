@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,6 +18,7 @@ import { EditarLancamentoUseCase } from '../../application/use-cases/editar-lanc
 import { ExcluirLancamentoUseCase } from '../../application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../../application/use-cases/obter-resumo-mensal.use-case';
 import { LancamentoNaoEncontradoError } from '../../application/errors/lancamento-nao-encontrado.error';
+import { CategoriaInexistenteError } from '../../application/errors/categoria-inexistente.error';
 import { CriarLancamentoRequest } from '../dtos/criar-lancamento.request';
 import { AtualizarLancamentoRequest } from '../dtos/atualizar-lancamento.request';
 import { CompetenciaQueryRequest } from '../dtos/competencia-query.request';
@@ -33,13 +35,18 @@ export class LancamentosController {
 
   @Post()
   async criar(@Body() body: CriarLancamentoRequest): Promise<LancamentoDTO> {
-    return this.criarLancamento.execute({
-      tipo: body.tipo,
-      categoria: body.categoria,
-      descricao: body.descricao ?? null,
-      valor: body.valor,
-      competencia: body.competencia,
-    });
+    try {
+      return await this.criarLancamento.execute({
+        tipo: body.tipo,
+        categoria: body.categoria,
+        categoriaId: body.categoriaId ?? null,
+        descricao: body.descricao ?? null,
+        valor: body.valor,
+        competencia: body.competencia,
+      });
+    } catch (error) {
+      throw this.mapErro(error);
+    }
   }
 
   @Get()
@@ -62,12 +69,13 @@ export class LancamentosController {
         id,
         tipo: body.tipo,
         categoria: body.categoria,
+        categoriaId: body.categoriaId ?? null,
         descricao: body.descricao ?? null,
         valor: body.valor,
         competencia: body.competencia,
       });
     } catch (error) {
-      throw this.mapNotFound(error);
+      throw this.mapErro(error);
     }
   }
 
@@ -77,13 +85,16 @@ export class LancamentosController {
     try {
       await this.excluirLancamento.execute(id);
     } catch (error) {
-      throw this.mapNotFound(error);
+      throw this.mapErro(error);
     }
   }
 
-  private mapNotFound(error: unknown): unknown {
+  private mapErro(error: unknown): unknown {
     if (error instanceof LancamentoNaoEncontradoError) {
       return new NotFoundException(error.message);
+    }
+    if (error instanceof CategoriaInexistenteError) {
+      return new BadRequestException(error.message);
     }
     return error;
   }

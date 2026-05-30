@@ -27,6 +27,10 @@ export class TypeOrmLancamentoRepository implements LancamentoRepository {
     return row ? LancamentoMapper.toDomain(row) : null;
   }
 
+  async existsByCategoriaId(categoriaId: string): Promise<boolean> {
+    return this.repo.existsBy({ categoriaId });
+  }
+
   async delete(id: string): Promise<boolean> {
     const result = await this.repo.delete({ id });
     return (result.affected ?? 0) > 0;

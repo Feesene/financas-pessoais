@@ -8,9 +8,7 @@ export const metadata = {
 export default function OrcamentoPage() {
   return (
     <Suspense
-      fallback={
-        <main className="container max-w-4xl py-8 text-muted-foreground">Carregando…</main>
-      }
+      fallback={<main className="container max-w-4xl py-8 text-muted-foreground">Carregando…</main>}
     >
       <OrcamentoView />
     </Suspense>

@@ -6,6 +6,7 @@ function props(overrides: Partial<LancamentoProps> = {}): LancamentoProps {
     id: 'id-1',
     tipo: 'DESPESA',
     categoria: 'Alimentação',
+    categoriaId: null,
     descricao: null,
     valor: 100,
     competencia: '2026-05',

@@ -130,28 +130,28 @@ export interface HistoricoCarteiraItemDTO {
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `TipoAtivo`, `TipoMovimentoCarteira`, `AtivoDTO`, `MovimentoCarteiraDTO`, `SubtotalTipoDTO`,
+- [x] T1 — Tipos `TipoAtivo`, `TipoMovimentoCarteira`, `AtivoDTO`, `MovimentoCarteiraDTO`, `SubtotalTipoDTO`,
   `PosicaoCarteiraDTO`, `HistoricoCarteiraItemDTO`.
 
 **Backend — módulo investimentos**
-- [ ] T2 — Domínio `Ativo` (entidade + regras por tipo + valorBruto derivado + repo interface). *(T1)*
-- [ ] T3 — Domínio `MovimentoCarteira` (entidade + repo interface). *(T1)*
-- [ ] T4 — Infra TypeORM (schemas, mappers, repos) + índices. *(T2,T3)*
-- [ ] T5 — Use cases CRUD de ativo (excluir bloqueia se houver movimentos). *(T4)*
-- [ ] T6 — Use cases registrar/editar/excluir movimento de carteira. *(T4)*
-- [ ] T7 — `ObterPosicaoCarteiraUseCase` (subtotais por tipo + total + rendimento total). *(T4)*
-- [ ] T8 — `ObterHistoricoCarteiraUseCase` (agregação por competência). *(T4)*
-- [ ] T9 — `InvestimentosModule` + controllers (rotas seção 5). *(T5,T6,T7,T8)*
+- [x] T2 — Domínio `Ativo` (entidade + regras por tipo + valorBruto derivado + repo interface). *(T1)*
+- [x] T3 — Domínio `MovimentoCarteira` (entidade + repo interface). *(T1)*
+- [x] T4 — Infra TypeORM (schemas, mappers, repos) + índices. *(T2,T3)*
+- [x] T5 — Use cases CRUD de ativo (excluir bloqueia se houver movimentos). *(T4)*
+- [x] T6 — Use cases registrar/editar/excluir movimento de carteira. *(T4)*
+- [x] T7 — `ObterPosicaoCarteiraUseCase` (subtotais por tipo + total + rendimento total). *(T4)*
+- [x] T8 — `ObterHistoricoCarteiraUseCase` (agregação por competência). *(T4)*
+- [x] T9 — `InvestimentosModule` + controllers (rotas seção 5). *(T5,T6,T7,T8)*
 
 **Frontend**
-- [ ] T10 — Cliente de API de investimentos. *(T9)*
-- [ ] T11 — Tela de carteira: ativos agrupados por tipo + subtotais + total geral + CRUD de ativo. *(T10)*
-- [ ] T12 — Formulário de ativo condicional por tipo (ação/FII: qtd+unitário; fundo: valorBruto). *(T10)*
-- [ ] T13 — Histórico de movimentações por mês + registro de movimento. *(T11)*
+- [x] T10 — Cliente de API de investimentos. *(T9)*
+- [x] T11 — Tela de carteira: ativos agrupados por tipo + subtotais + total geral + CRUD de ativo. *(T10)*
+- [x] T12 — Formulário de ativo condicional por tipo (ação/FII: qtd+unitário; fundo: valorBruto). *(T10)*
+- [x] T13 — Histórico de movimentações por mês + registro de movimento. *(T11)*
 
 **Testes**
-- [ ] T14 — Unitários de valorBruto/validação por tipo/posição. *(T7)*
-- [ ] T15 — e2e de CRUD, movimentos, histórico e 409 de exclusão. *(T9)*
+- [x] T14 — Unitários de valorBruto/validação por tipo/posição. *(T7)*
+- [x] T15 — e2e de CRUD, movimentos, histórico e 409 de exclusão. *(T9)*
 
 ## 11. Decisões e premissas
 

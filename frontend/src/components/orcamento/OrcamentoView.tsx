@@ -3,13 +3,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Plus, AlertTriangle, Inbox } from 'lucide-react';
-import type { LancamentoDTO, ResumoMensalDTO } from '@financas-pessoais/shared';
+import type {
+  ConsumoCategoriaDTO,
+  LancamentoDTO,
+  ResumoMensalDTO,
+} from '@financas-pessoais/shared';
 import { lancamentosApi } from '@/lib/api/lancamentos';
+import { categoriasApi } from '@/lib/api/categorias';
+import { recorrenciasApi } from '@/lib/api/recorrencias';
 import { competenciaAtual, competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartoesTotais } from './CartoesTotais';
+import { ConsumoCategorias } from './ConsumoCategorias';
 import { LancamentoFormDialog } from './LancamentoFormDialog';
 import { ListaLancamentos } from './ListaLancamentos';
 import { NavegacaoMeses } from './NavegacaoMeses';
@@ -35,17 +42,25 @@ export function OrcamentoView() {
 
   const [lancamentos, setLancamentos] = useState<LancamentoDTO[]>([]);
   const [resumo, setResumo] = useState<ResumoMensalDTO | null>(null);
+  const [consumo, setConsumo] = useState<ConsumoCategoriaDTO[]>([]);
   const [status, setStatus] = useState<Status>('loading');
 
   const carregar = useCallback(async () => {
     setStatus('loading');
     try {
-      const [lista, resumoMensal] = await Promise.all([
+      try {
+        await recorrenciasApi.materializar(competencia);
+      } catch {
+        // Falha na materialização não deve impedir a leitura do orçamento existente.
+      }
+      const [lista, resumoMensal, consumoCategorias] = await Promise.all([
         lancamentosApi.listar(competencia),
         lancamentosApi.resumo(competencia),
+        categoriasApi.consumo(competencia),
       ]);
       setLancamentos(lista);
       setResumo(resumoMensal);
+      setConsumo(consumoCategorias);
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -57,11 +72,11 @@ export function OrcamentoView() {
   }, [carregar]);
 
   return (
-    <main className="container max-w-4xl py-8">
+    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Orçamento Mensal</h1>
-          <p className="text-sm capitalize text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {competenciaLabel(competencia)}
           </p>
         </div>
@@ -100,6 +115,8 @@ export function OrcamentoView() {
       {status === 'ready' && resumo && (
         <div className="space-y-8">
           <CartoesTotais resumo={resumo} />
+
+          <ConsumoCategorias consumo={consumo} />
 
           {lancamentos.length === 0 ? (
             <Card className="border-dashed">

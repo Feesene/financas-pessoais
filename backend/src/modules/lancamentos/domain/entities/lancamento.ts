@@ -7,9 +7,15 @@ export interface LancamentoProps {
   id: string;
   tipo: TipoLancamento;
   categoria: string;
+  /** Categoria cadastrada referenciada; null enquanto não migrado (compat P1). */
+  categoriaId: string | null;
   descricao: string | null;
   valor: number;
   competencia: string;
+  /** Regra recorrente que originou o lançamento; null se manual (P3). */
+  origemRegraId?: string | null;
+  /** Índice (1-based) da ocorrência na regra; usado para idempotência e label "k/N". */
+  ocorrenciaIndice?: number | null;
 }
 
 /**
@@ -30,7 +36,12 @@ export class Lancamento {
     if (!COMPETENCIA_REGEX.test(props.competencia)) {
       throw new LancamentoInvalidoError('A competência deve estar no formato AAAA-MM.');
     }
-    return new Lancamento({ ...props, categoria: props.categoria.trim() });
+    return new Lancamento({
+      ...props,
+      categoria: props.categoria.trim(),
+      origemRegraId: props.origemRegraId ?? null,
+      ocorrenciaIndice: props.ocorrenciaIndice ?? null,
+    });
   }
 
   get id(): string {
@@ -45,6 +56,10 @@ export class Lancamento {
     return this.props.categoria;
   }
 
+  get categoriaId(): string | null {
+    return this.props.categoriaId;
+  }
+
   get descricao(): string | null {
     return this.props.descricao;
   }
@@ -57,6 +72,14 @@ export class Lancamento {
     return this.props.competencia;
   }
 
+  get origemRegraId(): string | null {
+    return this.props.origemRegraId ?? null;
+  }
+
+  get ocorrenciaIndice(): number | null {
+    return this.props.ocorrenciaIndice ?? null;
+  }
+
   /** Valor com sinal: positivo para receita, negativo para despesa. */
   get valorComSinal(): number {
     return this.props.tipo === 'RECEITA' ? this.props.valor : -this.props.valor;
@@ -65,8 +88,14 @@ export class Lancamento {
   /**
    * Retorna um novo lançamento com os atributos substituídos, preservando o `id`.
    * Reaplica as invariantes via factory (substituição completa, sem patch parcial).
+   * A origem (regra/ocorrência) é preservada: edição manual não desvincula da regra.
    */
   atualizar(props: Omit<LancamentoProps, 'id'>): Lancamento {
-    return Lancamento.criar({ ...props, id: this.props.id });
+    return Lancamento.criar({
+      ...props,
+      id: this.props.id,
+      origemRegraId: props.origemRegraId ?? this.props.origemRegraId ?? null,
+      ocorrenciaIndice: props.ocorrenciaIndice ?? this.props.ocorrenciaIndice ?? null,
+    });
   }
 }

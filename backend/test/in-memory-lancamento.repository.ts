@@ -17,6 +17,10 @@ export class InMemoryLancamentoRepository implements LancamentoRepository {
     return this.store.get(id) ?? null;
   }
 
+  async existsByCategoriaId(categoriaId: string): Promise<boolean> {
+    return [...this.store.values()].some((l) => l.categoriaId === categoriaId);
+  }
+
   async delete(id: string): Promise<boolean> {
     return this.store.delete(id);
   }

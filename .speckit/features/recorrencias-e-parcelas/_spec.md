@@ -107,29 +107,29 @@ export interface MaterializarResultadoDTO { competencia: string; criados: number
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `Frequencia`, `RegraRecorrenteDTO`, `MaterializarResultadoDTO`.
+- [x] T1 — Tipos `Frequencia`, `RegraRecorrenteDTO`, `MaterializarResultadoDTO`.
 
 **Backend — lancamentos (extensão)**
-- [ ] T2 — Adicionar `origemRegraId` e `ocorrenciaIndice` ao `Lancamento`/schema + índice único
+- [x] T2 — Adicionar `origemRegraId` e `ocorrenciaIndice` ao `Lancamento`/schema + índice único
   `(origemRegraId,ocorrenciaIndice)`. *(T1)*
-- [ ] T3 — Registrar exclusões de ocorrência (tabela/flag) para não recriar ao rematerializar. *(T2)*
+- [x] T3 — Registrar exclusões de ocorrência (tabela/flag) para não recriar ao rematerializar. *(T2)*
 
 **Backend — módulo recorrencias**
-- [ ] T4 — Domínio `RegraRecorrente` (entidade + regras de vigência/parcela + repo interface). *(T1)*
-- [ ] T5 — Infra TypeORM (schema, mapper, repo) + índices. *(T4)*
-- [ ] T6 — Use cases Criar/Editar(prospectivo)/Encerrar regra. *(T5)*
-- [ ] T7 — `MaterializarCompetenciaUseCase` idempotente (usa LancamentoRepository + registro de exclusões). *(T2,T3,T5)*
-- [ ] T8 — `RecorrenciasModule` + controller (rotas seção 5). *(T6,T7)*
+- [x] T4 — Domínio `RegraRecorrente` (entidade + regras de vigência/parcela + repo interface). *(T1)*
+- [x] T5 — Infra TypeORM (schema, mapper, repo) + índices. *(T4)*
+- [x] T6 — Use cases Criar/Editar(prospectivo)/Encerrar regra. *(T5)*
+- [x] T7 — `MaterializarCompetenciaUseCase` idempotente (usa LancamentoRepository + registro de exclusões). *(T2,T3,T5)*
+- [x] T8 — `RecorrenciasModule` + controller (rotas seção 5). *(T6,T7)*
 
 **Frontend**
-- [ ] T9 — Cliente de API de recorrências + materializar. *(T8)*
-- [ ] T10 — Tela de cadastro de recorrência/parcelamento. *(T9)*
-- [ ] T11 — Disparar materialização ao abrir um mês no orçamento e indicar origem dos lançamentos. *(T9)*
-- [ ] T12 — Ações de editar(prospectivo)/encerrar regra e excluir ocorrência. *(T10,T11)*
+- [x] T9 — Cliente de API de recorrências + materializar. *(T8)*
+- [x] T10 — Tela de cadastro de recorrência/parcelamento. *(T9)*
+- [x] T11 — Disparar materialização ao abrir um mês no orçamento e indicar origem dos lançamentos. *(T9)*
+- [x] T12 — Ações de editar(prospectivo)/encerrar regra e excluir ocorrência. *(T10,T11)*
 
 **Testes**
-- [ ] T13 — Unitários de vigência/parcelas. *(T4)*
-- [ ] T14 — e2e de idempotência, exclusão de ocorrência e edição prospectiva. *(T7,T8)*
+- [x] T13 — Unitários de vigência/parcelas. *(T4)*
+- [x] T14 — e2e de idempotência, exclusão de ocorrência e edição prospectiva. *(T7,T8)*
 
 ## 11. Decisões e premissas
 

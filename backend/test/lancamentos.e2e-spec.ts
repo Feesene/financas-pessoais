@@ -9,7 +9,11 @@ import { EditarLancamentoUseCase } from '../src/modules/lancamentos/application/
 import { ExcluirLancamentoUseCase } from '../src/modules/lancamentos/application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../src/modules/lancamentos/application/use-cases/obter-resumo-mensal.use-case';
 import { LANCAMENTO_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/lancamento.repository';
+import { OCORRENCIA_EXCLUIDA_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/ocorrencia-excluida.repository';
+import { CATEGORIA_REPOSITORY } from '../src/modules/categorias/domain/repositories/categoria.repository';
 import { InMemoryLancamentoRepository } from './in-memory-lancamento.repository';
+import { InMemoryOcorrenciaExcluidaRepository } from './in-memory-ocorrencia-excluida.repository';
+import { InMemoryCategoriaRepository } from './in-memory-categoria.repository';
 
 const COMPETENCIA = '2026-08';
 
@@ -26,6 +30,11 @@ describe('Lançamentos (e2e)', () => {
         ExcluirLancamentoUseCase,
         ObterResumoMensalUseCase,
         { provide: LANCAMENTO_REPOSITORY, useClass: InMemoryLancamentoRepository },
+        {
+          provide: OCORRENCIA_EXCLUIDA_REPOSITORY,
+          useClass: InMemoryOcorrenciaExcluidaRepository,
+        },
+        { provide: CATEGORIA_REPOSITORY, useClass: InMemoryCategoriaRepository },
       ],
     }).compile();
 

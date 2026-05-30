@@ -79,6 +79,10 @@ export interface ConsumoCategoriaDTO {
 - **RF-006** — Frontend **DEVE** ter tela de categorias e definição de metas, e exibir consumo/estouro no
   orçamento (P1).
 - **RF-007** — Frontend **DEVERIA** usar a cor da categoria nas listas e gráficos.
+- **RF-008** — Frontend **DEVE** seguir o design system ([`docs/ui-frontend.md`](../../../docs/ui-frontend.md)):
+  CRUD de categoria e definição de meta em **modais** (`Dialog`); exclusão com **`AlertDialog`** (e mensagem
+  clara quando bloqueada por 409); cor da categoria via seletor de cor; **consumo/estouro com barra de
+  progresso** e **`Badge`** de estouro; avisos via **`toast`** (`sonner`).
 
 ## 7. Requisitos não-funcionais
 
@@ -106,31 +110,31 @@ export interface ConsumoCategoriaDTO {
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `CategoriaDTO`, `MetaMensalDTO`, `ConsumoCategoriaDTO` em shared.
+- [x] T1 — Tipos `CategoriaDTO`, `MetaMensalDTO`, `ConsumoCategoriaDTO` em shared.
 
 **Backend — módulo categorias**
-- [ ] T2 — Domínio `Categoria` (entidade + repo interface + erros). *(T1)*
-- [ ] T3 — Domínio `MetaMensal` + repo interface (regra: só despesa). *(T1)*
-- [ ] T4 — Infra TypeORM: schemas, mappers e repositórios de Categoria e Meta + índices. *(T2,T3)*
-- [ ] T5 — Use cases Criar/Editar/Excluir Categoria (excluir bloqueia se vinculada). *(T4)*
-- [ ] T6 — Use cases Definir/Remover Meta. *(T4)*
-- [ ] T7 — `ObterConsumoCategoriasUseCase` (cruza meta × despesas). *(T4)*
-- [ ] T8 — `CategoriasModule` + controller (rotas da seção 5). *(T5,T6,T7)*
+- [x] T2 — Domínio `Categoria` (entidade + repo interface + erros). *(T1)*
+- [x] T3 — Domínio `MetaMensal` + repo interface (regra: só despesa). *(T1)*
+- [x] T4 — Infra TypeORM: schemas, mappers e repositórios de Categoria e Meta + índices. *(T2,T3)*
+- [x] T5 — Use cases Criar/Editar/Excluir Categoria (excluir bloqueia se vinculada). *(T4)*
+- [x] T6 — Use cases Definir/Remover Meta. *(T4)*
+- [x] T7 — `ObterConsumoCategoriasUseCase` (cruza meta × despesas). *(T4)*
+- [x] T8 — `CategoriasModule` + controller (rotas da seção 5). *(T5,T6,T7)*
 
 **Backend — ajuste em lancamentos**
-- [ ] T9 — Adicionar `categoriaId` (FK) ao `Lancamento`/schema; manter compat e validar categoria existente. *(T4)*
-- [ ] T10 — Migration: criar categorias a partir dos textos distintos de lançamentos existentes e popular
+- [x] T9 — Adicionar `categoriaId` (FK) ao `Lancamento`/schema; manter compat e validar categoria existente. *(T4)*
+- [x] T10 — Migration: criar categorias a partir dos textos distintos de lançamentos existentes e popular
   `categoriaId`. *(T9)*
 
 **Frontend**
-- [ ] T11 — Cliente de API de categorias/metas/consumo. *(T8)*
-- [ ] T12 — Tela de gestão de categorias (CRUD + cor). *(T11)*
-- [ ] T13 — UI de definição de meta por categoria/competência. *(T11)*
-- [ ] T14 — Integrar consumo/estouro na tela de orçamento (P1): barra de consumo e destaque. *(T11)*
+- [x] T11 — Cliente de API de categorias/metas/consumo. *(T8)*
+- [x] T12 — Tela de gestão de categorias (CRUD + cor). *(T11)*
+- [x] T13 — UI de definição de meta por categoria/competência. *(T11)*
+- [x] T14 — Integrar consumo/estouro na tela de orçamento (P1): barra de consumo e destaque. *(T11)*
 
 **Testes**
-- [ ] T15 — Unitários de domínio/casos de uso. *(T5,T6,T7)*
-- [ ] T16 — e2e de categorias+metas+consumo e da migração. *(T8,T10)*
+- [x] T15 — Unitários de domínio/casos de uso. *(T5,T6,T7)*
+- [x] T16 — e2e de categorias+metas+consumo e da migração. *(T8,T10)*
 
 ## 11. Decisões e premissas
 

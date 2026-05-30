@@ -136,29 +136,29 @@ export type FormatoExportacao = 'pdf' | 'xlsx';
 ## 10. Breakdown de tarefas
 
 **Shared**
-- [ ] T1 — Tipos `ConsolidadoMensalDTO`, `TotaisAnoDTO`, `ConsolidadoDTO`, `GastoPorCategoriaItemDTO`,
+- [x] T1 — Tipos `ConsolidadoMensalDTO`, `TotaisAnoDTO`, `ConsolidadoDTO`, `GastoPorCategoriaItemDTO`,
   `EvolucaoMensalItemDTO`, `ComparacaoCategoriaItemDTO`, `ComparacaoMesesDTO`, `FormatoExportacao`.
 
 **Backend — módulo relatorios (somente leitura)**
-- [ ] T2 — Definir ports `LancamentoQueryPort`, `CategoriaQueryPort`, `ReservaQueryPort` no domínio. *(T1)*
-- [ ] T3 — Adapters de infra implementando os ports sobre os repositórios reais de P1/P2/P4 (ACL). *(T2)*
-- [ ] T4 — `ObterConsolidadoUseCase` (linhas por competência + totais + sobras). *(T2)*
-- [ ] T5 — `ObterGastoPorCategoriaUseCase` (agregação + percentual). *(T2)*
-- [ ] T6 — `ObterEvolucaoUseCase` (receitas/despesas/saldo por mês). *(T2)*
-- [ ] T7 — `CompararMesesUseCase` (gastoA/gastoB/variação/variacaoPct por categoria). *(T2)*
-- [ ] T8 — Serviço de exportação PDF/XLSX a partir do `ConsolidadoDTO`. *(T4)*
-- [ ] T9 — `RelatoriosModule` + controller (rotas seção 5), injetando adapters. *(T3,T4,T5,T6,T7,T8)*
+- [x] T2 — Definir ports `LancamentoQueryPort`, `CategoriaQueryPort`, `ReservaQueryPort` no domínio. *(T1)*
+- [x] T3 — Adapters de infra implementando os ports sobre os repositórios reais de P1/P2/P4 (ACL). *(T2)*
+- [x] T4 — `ObterConsolidadoUseCase` (linhas por competência + totais + sobras). *(T2)*
+- [x] T5 — `ObterGastoPorCategoriaUseCase` (agregação + percentual). *(T2)*
+- [x] T6 — `ObterEvolucaoUseCase` (receitas/despesas/saldo por mês). *(T2)*
+- [x] T7 — `CompararMesesUseCase` (gastoA/gastoB/variação/variacaoPct por categoria). *(T2)*
+- [x] T8 — Serviço de exportação PDF/XLSX a partir do `ConsolidadoDTO`. *(T4)*
+- [x] T9 — `RelatoriosModule` + controller (rotas seção 5), injetando adapters. *(T3,T4,T5,T6,T7,T8)*
 
 **Frontend**
-- [ ] T10 — Cliente de API de relatórios. *(T9)*
-- [ ] T11 — Tela de histórico: tabela consolidada por mês + linha de totais + seletor de ano/intervalo. *(T10)*
-- [ ] T12 — Tela de relatórios: gráfico de gasto por categoria + evolução mensal. *(T10)*
-- [ ] T13 — Comparação entre dois meses (seleção A/B + tabela de variação). *(T10)*
-- [ ] T14 — Botão de exportar (PDF/XLSX) acionando o endpoint e baixando o arquivo. *(T11,T12)*
+- [x] T10 — Cliente de API de relatórios. *(T9)*
+- [x] T11 — Tela de histórico: tabela consolidada por mês + linha de totais + seletor de ano/intervalo. *(T10)*
+- [x] T12 — Tela de relatórios: gráfico de gasto por categoria + evolução mensal. *(T10)*
+- [x] T13 — Comparação entre dois meses (seleção A/B + tabela de variação). *(T10)*
+- [x] T14 — Botão de exportar (PDF/XLSX) acionando o endpoint e baixando o arquivo. *(T11,T12)*
 
 **Testes**
-- [ ] T15 — Unitários de agregação (sobras, percentual, variação, meses vazios). *(T4,T5,T6,T7)*
-- [ ] T16 — e2e do consolidado cruzando P1+P2+P4 e da exportação. *(T9)*
+- [x] T15 — Unitários de agregação (sobras, percentual, variação, meses vazios). *(T4,T5,T6,T7)*
+- [x] T16 — e2e do consolidado cruzando P1+P2+P4 e da exportação. *(T9)*
 
 ## 11. Decisões e premissas
 

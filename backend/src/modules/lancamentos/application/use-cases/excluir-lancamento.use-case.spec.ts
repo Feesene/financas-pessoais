@@ -2,14 +2,17 @@ import { ExcluirLancamentoUseCase } from './excluir-lancamento.use-case';
 import { Lancamento } from '../../domain/entities/lancamento';
 import { LancamentoNaoEncontradoError } from '../errors/lancamento-nao-encontrado.error';
 import { InMemoryLancamentoRepository } from '../../../../../test/in-memory-lancamento.repository';
+import { InMemoryOcorrenciaExcluidaRepository } from '../../../../../test/in-memory-ocorrencia-excluida.repository';
 
 describe('ExcluirLancamentoUseCase', () => {
   let repo: InMemoryLancamentoRepository;
+  let exclusoes: InMemoryOcorrenciaExcluidaRepository;
   let useCase: ExcluirLancamentoUseCase;
 
   beforeEach(() => {
     repo = new InMemoryLancamentoRepository();
-    useCase = new ExcluirLancamentoUseCase(repo);
+    exclusoes = new InMemoryOcorrenciaExcluidaRepository();
+    useCase = new ExcluirLancamentoUseCase(repo, exclusoes);
   });
 
   it('chama delete e remove o lançamento existente', async () => {
@@ -18,6 +21,7 @@ describe('ExcluirLancamentoUseCase', () => {
         id: 'l-1',
         tipo: 'DESPESA',
         categoria: 'Transporte',
+        categoriaId: null,
         descricao: null,
         valor: 20,
         competencia: '2026-05',

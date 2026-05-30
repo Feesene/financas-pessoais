@@ -1,0 +1,11 @@
+import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+
+export class AtualizarCategoriaRequest {
+  @IsString()
+  @MaxLength(80)
+  nome!: string;
+
+  @IsOptional()
+  @Matches(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, { message: 'cor deve ser hexadecimal (ex.: #22c55e)' })
+  cor?: string;
+}

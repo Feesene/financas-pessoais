@@ -6,6 +6,8 @@ export interface LancamentoRepository {
   findByCompetencia(competencia: string): Promise<Lancamento[]>;
   /** Busca um lançamento pelo id; null se não existir. */
   findById(id: string): Promise<Lancamento | null>;
+  /** Indica se existe ao menos um lançamento vinculado à categoria. */
+  existsByCategoriaId(categoriaId: string): Promise<boolean>;
   /** Remove um lançamento; retorna false se o id não existir. */
   delete(id: string): Promise<boolean>;
 }

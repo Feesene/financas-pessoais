@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { LancamentoDTO } from '@financas-pessoais/shared';
 import { ApiError, lancamentosApi } from '@/lib/api/lancamentos';
@@ -29,6 +29,7 @@ interface Props {
 export function LancamentoItem({ lancamento, onAlterado }: Props) {
   const [excluindo, setExcluindo] = useState(false);
   const receita = lancamento.tipo === 'RECEITA';
+  const deRegra = lancamento.origemRegraId !== null;
 
   async function excluir() {
     setExcluindo(true);
@@ -50,7 +51,15 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
   return (
     <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40">
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{lancamento.descricao ?? lancamento.categoria}</p>
+        <p className="flex items-center gap-1.5 font-medium">
+          {deRegra && (
+            <Repeat
+              className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+              aria-label="Gerado por recorrência"
+            />
+          )}
+          <span className="truncate">{lancamento.descricao ?? lancamento.categoria}</span>
+        </p>
         {lancamento.descricao && (
           <p className="truncate text-xs text-muted-foreground">{lancamento.categoria}</p>
         )}
@@ -97,6 +106,8 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
                 Esta ação não pode ser desfeita. O lançamento{' '}
                 <strong>{lancamento.descricao ?? lancamento.categoria}</strong> (
                 {formatarReais(lancamento.valor)}) será removido permanentemente.
+                {deRegra &&
+                  ' Por ter origem em uma recorrência, esta ocorrência não será recriada ao reabrir o mês.'}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

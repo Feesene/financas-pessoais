@@ -9,6 +9,9 @@
     "start:prod": "node dist/main",
     "test": "jest",
     "test:watch": "jest --watch",
+    "typeorm": "typeorm-ts-node-commonjs -d src/shared/config/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
@@ -20,6 +23,8 @@
     "@nestjs/typeorm": "^10.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.18.0",
     "pg": "^8.11.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0",
@@ -31,10 +36,12 @@
     "@types/express": "^4.17.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.12.0",
+    "@types/pdfkit": "^0.17.6",
     "@types/supertest": "^6.0.3",
     "jest": "^29.7.0",
     "supertest": "^6.3.4",
     "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
     "typescript": "^5.4.0"
   }
 }
