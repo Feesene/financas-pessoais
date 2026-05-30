@@ -7,6 +7,8 @@ import { ListarBaldesUseCase } from './application/use-cases/listar-baldes.use-c
 import { EditarBaldeUseCase } from './application/use-cases/editar-balde.use-case';
 import { ExcluirBaldeUseCase } from './application/use-cases/excluir-balde.use-case';
 import { RegistrarMovimentoUseCase } from './application/use-cases/registrar-movimento.use-case';
+import { ListarMovimentosBaldeUseCase } from './application/use-cases/listar-movimentos-balde.use-case';
+import { ListarMovimentosCompetenciaUseCase } from './application/use-cases/listar-movimentos-competencia.use-case';
 import { EditarMovimentoUseCase } from './application/use-cases/editar-movimento.use-case';
 import { ExcluirMovimentoUseCase } from './application/use-cases/excluir-movimento.use-case';
 import { ObterSaldosUseCase } from './application/use-cases/obter-saldos.use-case';
@@ -28,6 +30,8 @@ import { ReservasController } from './presentation/controllers/reservas.controll
     EditarBaldeUseCase,
     ExcluirBaldeUseCase,
     RegistrarMovimentoUseCase,
+    ListarMovimentosBaldeUseCase,
+    ListarMovimentosCompetenciaUseCase,
     EditarMovimentoUseCase,
     ExcluirMovimentoUseCase,
     ObterSaldosUseCase,

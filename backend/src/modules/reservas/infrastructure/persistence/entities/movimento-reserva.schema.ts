@@ -4,10 +4,10 @@ import type { TipoMovimentoReserva } from '@financas-pessoais/shared';
 @Entity({ name: 'movimentos_reserva' })
 @Index('idx_movimentos_balde_competencia', ['baldeId', 'competencia'])
 export class MovimentoReservaSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar' })
   baldeId!: string;
 
   @Column({ type: 'varchar', length: 10 })
@@ -21,4 +21,9 @@ export class MovimentoReservaSchema {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   descricao!: string | null;
+
+  // Nullable para o `synchronize` conseguir adicionar a coluna em tabelas já
+  // populadas; linhas antigas ficam null e o mapper aplica fallback ao ler.
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  criadoEm!: string | null;
 }

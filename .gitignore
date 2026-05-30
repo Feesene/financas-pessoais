@@ -8,6 +8,10 @@ dist/
 build/
 .next/
 out/
+financas-v*/
+data/
+logs/
+*.db
 
 # Environment
 .env

@@ -4,7 +4,7 @@ import type { TipoLancamento } from '@financas-pessoais/shared';
 @Entity({ name: 'categorias' })
 @Index('uq_categorias_nome_tipo', ['nome', 'tipo'], { unique: true })
 export class CategoriaSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
   @Column({ type: 'varchar', length: 80 })

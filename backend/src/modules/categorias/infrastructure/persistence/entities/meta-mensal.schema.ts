@@ -3,10 +3,10 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 @Entity({ name: 'metas_mensais' })
 @Index('idx_metas_categoria_competencia', ['categoriaId', 'competencia'], { unique: true })
 export class MetaMensalSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar' })
   categoriaId!: string;
 
   @Column({ type: 'varchar', length: 7 })

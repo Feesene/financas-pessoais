@@ -21,6 +21,7 @@ import { ListarBaldesUseCase } from '../../application/use-cases/listar-baldes.u
 import { EditarBaldeUseCase } from '../../application/use-cases/editar-balde.use-case';
 import { ExcluirBaldeUseCase } from '../../application/use-cases/excluir-balde.use-case';
 import { RegistrarMovimentoUseCase } from '../../application/use-cases/registrar-movimento.use-case';
+import { ListarMovimentosBaldeUseCase } from '../../application/use-cases/listar-movimentos-balde.use-case';
 import { ObterEvolucaoBaldeUseCase } from '../../application/use-cases/obter-evolucao-balde.use-case';
 import { BaldeNaoEncontradoError } from '../../application/errors/balde-nao-encontrado.error';
 import { BaldeDuplicadoError } from '../../application/errors/balde-duplicado.error';
@@ -39,6 +40,7 @@ export class BaldesController {
     private readonly editarBalde: EditarBaldeUseCase,
     private readonly excluirBalde: ExcluirBaldeUseCase,
     private readonly registrarMovimento: RegistrarMovimentoUseCase,
+    private readonly listarMovimentos: ListarMovimentosBaldeUseCase,
     private readonly obterEvolucao: ObterEvolucaoBaldeUseCase,
   ) {}
 
@@ -100,6 +102,15 @@ export class BaldesController {
         competencia: body.competencia,
         descricao: body.descricao ?? null,
       });
+    } catch (error) {
+      throw mapErroReservas(error);
+    }
+  }
+
+  @Get(':id/movimentos')
+  async movimentos(@Param('id') id: string): Promise<MovimentoReservaDTO[]> {
+    try {
+      return await this.listarMovimentos.execute(id);
     } catch (error) {
       throw mapErroReservas(error);
     }

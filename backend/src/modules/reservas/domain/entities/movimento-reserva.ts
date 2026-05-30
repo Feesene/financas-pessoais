@@ -11,14 +11,18 @@ export interface MovimentoReservaProps {
   valor: number;
   competencia: string;
   descricao: string | null;
+  /** Timestamp ISO de criação. Gerado no `criar()` quando ausente; imutável. */
+  criadoEm?: string;
 }
+
+interface MovimentoReservaState extends Required<MovimentoReservaProps> {}
 
 /**
  * Movimento de reserva: aporte (entrada) ou retirada (saída) de um balde.
  * Invariantes: valor > 0, competência no formato AAAA-MM e tipo APORTE|RETIRADA.
  */
 export class MovimentoReserva {
-  private constructor(private readonly props: MovimentoReservaProps) {}
+  private constructor(private readonly props: MovimentoReservaState) {}
 
   static criar(props: MovimentoReservaProps): MovimentoReserva {
     if (!TIPOS.includes(props.tipo)) {
@@ -31,7 +35,8 @@ export class MovimentoReserva {
       throw new MovimentoInvalidoError('A competência deve estar no formato AAAA-MM.');
     }
     const descricao = props.descricao?.trim() ? props.descricao.trim() : null;
-    return new MovimentoReserva({ ...props, descricao });
+    const criadoEm = props.criadoEm ?? new Date().toISOString();
+    return new MovimentoReserva({ ...props, descricao, criadoEm });
   }
 
   get id(): string {
@@ -58,6 +63,10 @@ export class MovimentoReserva {
     return this.props.descricao;
   }
 
+  get criadoEm(): string {
+    return this.props.criadoEm;
+  }
+
   /** Efeito no saldo em centavos: positivo para aporte, negativo para retirada. */
   get efeitoEmCentavos(): number {
     const centavos = Math.round(this.props.valor * 100);
@@ -74,6 +83,7 @@ export class MovimentoReserva {
     return MovimentoReserva.criar({
       id: this.props.id,
       baldeId: this.props.baldeId,
+      criadoEm: this.props.criadoEm,
       ...props,
     });
   }

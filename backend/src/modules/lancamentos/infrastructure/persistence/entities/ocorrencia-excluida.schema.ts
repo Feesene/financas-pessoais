@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'ocorrencias_excluidas' })
 export class OcorrenciaExcluidaSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   origemRegraId!: string;
 
   @PrimaryColumn({ type: 'int' })

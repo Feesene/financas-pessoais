@@ -10,6 +10,9 @@ export class MovimentoReservaMapper {
       valor: Number(schema.valor),
       competencia: schema.competencia,
       descricao: schema.descricao,
+      // Linhas anteriores à coluna não têm timestamp; usa o 1º dia da
+      // competência como data plausível de lançamento.
+      criadoEm: schema.criadoEm ?? `${schema.competencia}-01T00:00:00.000Z`,
     });
   }
 
@@ -21,6 +24,7 @@ export class MovimentoReservaMapper {
     schema.valor = movimento.valor.toFixed(2);
     schema.competencia = movimento.competencia;
     schema.descricao = movimento.descricao;
+    schema.criadoEm = movimento.criadoEm;
     return schema;
   }
 }

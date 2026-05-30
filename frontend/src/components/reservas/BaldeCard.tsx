@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, LineChart, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, History, LineChart, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { SaldoBaldeDTO } from '@financas-pessoais/shared';
 import { reservasApi } from '@/lib/api/reservas';
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BaldeFormDialog } from './BaldeFormDialog';
 import { MovimentoFormDialog } from './MovimentoFormDialog';
+import { MovimentosBaldeDialog } from './MovimentosBaldeDialog';
 import { EvolucaoDialog } from './EvolucaoDialog';
 
 interface Props {
@@ -72,14 +73,30 @@ export function BaldeCard({ item, competencia, onAlterado }: Props) {
               {formatarReais(saldo)}
             </p>
           </div>
-          <EvolucaoDialog
-            balde={balde}
-            trigger={
-              <Button variant="ghost" size="icon" aria-label="Ver evolução" title="Ver evolução">
-                <LineChart />
-              </Button>
-            }
-          />
+          <div className="flex shrink-0 items-center">
+            <MovimentosBaldeDialog
+              balde={balde}
+              onAlterado={onAlterado}
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Ver movimentos"
+                  title="Ver movimentos"
+                >
+                  <History />
+                </Button>
+              }
+            />
+            <EvolucaoDialog
+              balde={balde}
+              trigger={
+                <Button variant="ghost" size="icon" aria-label="Ver evolução" title="Ver evolução">
+                  <LineChart />
+                </Button>
+              }
+            />
+          </div>
         </div>
 
         {negativo && (

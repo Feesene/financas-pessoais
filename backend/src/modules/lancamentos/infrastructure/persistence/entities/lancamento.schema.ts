@@ -4,7 +4,7 @@ import type { TipoLancamento } from '@financas-pessoais/shared';
 @Entity({ name: 'lancamentos' })
 @Index('uq_lancamentos_origem_ocorrencia', ['origemRegraId', 'ocorrenciaIndice'], { unique: true })
 export class LancamentoSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
   @Column({ type: 'varchar', length: 10 })
@@ -14,7 +14,7 @@ export class LancamentoSchema {
   categoria!: string;
 
   @Index('idx_lancamentos_categoria_competencia')
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   categoriaId!: string | null;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
@@ -27,7 +27,7 @@ export class LancamentoSchema {
   @Column({ type: 'varchar', length: 7 })
   competencia!: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   origemRegraId!: string | null;
 
   @Column({ type: 'int', nullable: true })

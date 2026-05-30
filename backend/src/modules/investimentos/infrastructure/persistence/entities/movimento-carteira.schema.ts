@@ -4,10 +4,10 @@ import type { TipoMovimentoCarteira } from '@financas-pessoais/shared';
 @Entity({ name: 'movimentos_carteira' })
 @Index('idx_movimentos_carteira_ativo_competencia', ['ativoId', 'competencia'])
 export class MovimentoCarteiraSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar' })
   ativoId!: string;
 
   @Column({ type: 'varchar', length: 10 })

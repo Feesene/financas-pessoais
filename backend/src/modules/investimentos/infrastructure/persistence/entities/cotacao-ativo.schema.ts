@@ -4,10 +4,10 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 @Index('uq_cotacao_ativo_ativo_competencia', ['ativoId', 'competencia'], { unique: true })
 @Index('idx_cotacao_ativo_ativo', ['ativoId'])
 export class CotacaoAtivoSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
-  @Column('uuid')
+  @Column('varchar')
   ativoId!: string;
 
   @Column({ type: 'varchar', length: 7 })

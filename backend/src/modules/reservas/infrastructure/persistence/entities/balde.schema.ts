@@ -3,7 +3,7 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 @Entity({ name: 'baldes' })
 @Index('uq_baldes_nome', ['nome'], { unique: true })
 export class BaldeSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
   @Column({ type: 'varchar', length: 80 })

@@ -1,6 +1,7 @@
 import type {
   BaldeDTO,
   EvolucaoBaldeDTO,
+  MovimentoReservaComBaldeDTO,
   MovimentoReservaDTO,
   SaldosReservaDTO,
   TipoMovimentoReserva,
@@ -74,5 +75,15 @@ export const reservasApi = {
 
   evolucao(baldeId: string): Promise<EvolucaoBaldeDTO[]> {
     return request<EvolucaoBaldeDTO[]>(`/baldes/${encodeURIComponent(baldeId)}/evolucao`);
+  },
+
+  listarMovimentosBalde(baldeId: string): Promise<MovimentoReservaDTO[]> {
+    return request<MovimentoReservaDTO[]>(`/baldes/${encodeURIComponent(baldeId)}/movimentos`);
+  },
+
+  movimentosDoMes(competencia: string): Promise<MovimentoReservaComBaldeDTO[]> {
+    return request<MovimentoReservaComBaldeDTO[]>(
+      `/reservas/movimentos?competencia=${encodeURIComponent(competencia)}`,
+    );
   },
 };

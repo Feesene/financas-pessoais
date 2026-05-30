@@ -4,13 +4,13 @@ import type { Frequencia, TipoLancamento } from '@financas-pessoais/shared';
 @Entity({ name: 'regras_recorrentes' })
 @Index('idx_regras_ativa_inicio', ['ativa', 'competenciaInicio'])
 export class RegraRecorrenteSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
   @Column({ type: 'varchar', length: 10 })
   tipo!: TipoLancamento;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar' })
   categoriaId!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })

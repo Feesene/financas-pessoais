@@ -6,6 +6,7 @@ import { HistoricoTabela } from './HistoricoTabela';
 import { GraficosRelatorio } from './GraficosRelatorio';
 import { ComparacaoMeses } from './ComparacaoMeses';
 import { ExportarButton } from './ExportarButton';
+import { LegendaRelatorio } from './LegendaRelatorio';
 import { SeletorAno } from './SeletorAno';
 
 type Aba = 'historico' | 'graficos' | 'comparacao';
@@ -53,6 +54,8 @@ export function RelatoriosView() {
           </button>
         ))}
       </nav>
+
+      <LegendaRelatorio />
 
       {aba === 'historico' && <HistoricoTabela ano={ano} />}
       {aba === 'graficos' && <GraficosRelatorio de={de} ate={ate} />}

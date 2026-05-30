@@ -5,6 +5,8 @@ export interface MovimentoReservaRepository {
   findById(id: string): Promise<MovimentoReserva | null>;
   findAll(): Promise<MovimentoReserva[]>;
   findByBaldeId(baldeId: string): Promise<MovimentoReserva[]>;
+  /** Movimentos de uma competência (AAAA-MM), de todos os baldes. */
+  findByCompetencia(competencia: string): Promise<MovimentoReserva[]>;
   /** true se o balde possui ao menos um movimento. */
   existsByBaldeId(baldeId: string): Promise<boolean>;
   /** Remove um movimento; retorna false se o id não existir. */

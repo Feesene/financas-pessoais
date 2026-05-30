@@ -44,27 +44,36 @@ export function OrcamentoView() {
   const [consumo, setConsumo] = useState<ConsumoCategoriaDTO[]>([]);
   const [status, setStatus] = useState<Status>('loading');
 
-  const carregar = useCallback(async () => {
-    setStatus('loading');
-    try {
+  // Refetch dos dados do mês. `comEsqueleto` controla se a tela troca para o
+  // estado de carregamento (carga inicial/troca de competência) ou atualiza em
+  // silêncio, preservando a rolagem — usado após registrar/desmarcar pagamento.
+  const recarregar = useCallback(
+    async (comEsqueleto: boolean) => {
+      if (comEsqueleto) setStatus('loading');
       try {
-        await recorrenciasApi.materializar(competencia);
+        try {
+          await recorrenciasApi.materializar(competencia);
+        } catch {
+          // Falha na materialização não deve impedir a leitura do orçamento existente.
+        }
+        const [lista, resumoMensal, consumoCategorias] = await Promise.all([
+          lancamentosApi.listar(competencia),
+          lancamentosApi.resumo(competencia),
+          categoriasApi.consumo(competencia),
+        ]);
+        setLancamentos(lista);
+        setResumo(resumoMensal);
+        setConsumo(consumoCategorias);
+        setStatus('ready');
       } catch {
-        // Falha na materialização não deve impedir a leitura do orçamento existente.
+        if (comEsqueleto) setStatus('error');
       }
-      const [lista, resumoMensal, consumoCategorias] = await Promise.all([
-        lancamentosApi.listar(competencia),
-        lancamentosApi.resumo(competencia),
-        categoriasApi.consumo(competencia),
-      ]);
-      setLancamentos(lista);
-      setResumo(resumoMensal);
-      setConsumo(consumoCategorias);
-      setStatus('ready');
-    } catch {
-      setStatus('error');
-    }
-  }, [competencia]);
+    },
+    [competencia],
+  );
+
+  const carregar = useCallback(() => recarregar(true), [recarregar]);
+  const recarregarSilencioso = useCallback(() => recarregar(false), [recarregar]);
 
   useEffect(() => {
     void carregar();
@@ -138,7 +147,7 @@ export function OrcamentoView() {
               </CardContent>
             </Card>
           ) : (
-            <ListaLancamentos lancamentos={lancamentos} onAlterado={carregar} />
+            <ListaLancamentos lancamentos={lancamentos} onAlterado={recarregarSilencioso} />
           )}
         </div>
       )}

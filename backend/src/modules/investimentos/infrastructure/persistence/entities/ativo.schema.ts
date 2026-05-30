@@ -3,7 +3,7 @@ import type { TipoAtivo } from '@financas-pessoais/shared';
 
 @Entity({ name: 'ativos' })
 export class AtivoSchema {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn('varchar')
   id!: string;
 
   @Column({ type: 'varchar', length: 10 })

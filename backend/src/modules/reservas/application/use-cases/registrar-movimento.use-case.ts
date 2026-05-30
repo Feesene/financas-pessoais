@@ -53,5 +53,6 @@ export function movimentoToDTO(movimento: MovimentoReserva): MovimentoReservaDTO
     valor: movimento.valor,
     competencia: movimento.competencia,
     descricao: movimento.descricao,
+    criadoEm: movimento.criadoEm,
   };
 }

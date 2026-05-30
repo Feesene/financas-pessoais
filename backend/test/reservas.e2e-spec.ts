@@ -15,6 +15,8 @@ import { ListarBaldesUseCase } from '../src/modules/reservas/application/use-cas
 import { EditarBaldeUseCase } from '../src/modules/reservas/application/use-cases/editar-balde.use-case';
 import { ExcluirBaldeUseCase } from '../src/modules/reservas/application/use-cases/excluir-balde.use-case';
 import { RegistrarMovimentoUseCase } from '../src/modules/reservas/application/use-cases/registrar-movimento.use-case';
+import { ListarMovimentosBaldeUseCase } from '../src/modules/reservas/application/use-cases/listar-movimentos-balde.use-case';
+import { ListarMovimentosCompetenciaUseCase } from '../src/modules/reservas/application/use-cases/listar-movimentos-competencia.use-case';
 import { EditarMovimentoUseCase } from '../src/modules/reservas/application/use-cases/editar-movimento.use-case';
 import { ExcluirMovimentoUseCase } from '../src/modules/reservas/application/use-cases/excluir-movimento.use-case';
 import { ObterSaldosUseCase } from '../src/modules/reservas/application/use-cases/obter-saldos.use-case';
@@ -36,6 +38,8 @@ describe('Reservas (e2e)', () => {
         EditarBaldeUseCase,
         ExcluirBaldeUseCase,
         RegistrarMovimentoUseCase,
+        ListarMovimentosBaldeUseCase,
+        ListarMovimentosCompetenciaUseCase,
         EditarMovimentoUseCase,
         ExcluirMovimentoUseCase,
         ObterSaldosUseCase,

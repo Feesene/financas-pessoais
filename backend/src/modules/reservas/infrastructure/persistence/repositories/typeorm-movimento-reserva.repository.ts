@@ -32,6 +32,11 @@ export class TypeOrmMovimentoReservaRepository implements MovimentoReservaReposi
     return rows.map(MovimentoReservaMapper.toDomain);
   }
 
+  async findByCompetencia(competencia: string): Promise<MovimentoReserva[]> {
+    const rows = await this.repo.find({ where: { competencia }, order: { criadoEm: 'DESC' } });
+    return rows.map(MovimentoReservaMapper.toDomain);
+  }
+
   async existsByBaldeId(baldeId: string): Promise<boolean> {
     return (await this.repo.countBy({ baldeId })) > 0;
   }

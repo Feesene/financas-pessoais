@@ -21,6 +21,10 @@ export class InMemoryMovimentoReservaRepository implements MovimentoReservaRepos
     return [...this.store.values()].filter((m) => m.baldeId === baldeId);
   }
 
+  async findByCompetencia(competencia: string): Promise<MovimentoReserva[]> {
+    return [...this.store.values()].filter((m) => m.competencia === competencia);
+  }
+
   async existsByBaldeId(baldeId: string): Promise<boolean> {
     return [...this.store.values()].some((m) => m.baldeId === baldeId);
   }

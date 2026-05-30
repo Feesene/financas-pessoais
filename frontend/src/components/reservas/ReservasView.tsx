@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, PiggyBank, Plus } from 'lucide-react';
-import type { SaldoBaldeDTO } from '@financas-pessoais/shared';
+import type { MovimentoReservaComBaldeDTO, SaldoBaldeDTO } from '@financas-pessoais/shared';
 import { reservasApi } from '@/lib/api/reservas';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { NavegacaoMeses } from '@/components/orcamento/NavegacaoMeses';
 import { BaldeCard } from './BaldeCard';
 import { BaldeFormDialog } from './BaldeFormDialog';
+import { MovimentosMesLista } from './MovimentosMesLista';
 
 type Status = 'loading' | 'ready' | 'error';
 
@@ -19,14 +20,19 @@ export function ReservasView() {
   const { competencia } = useCompetencia();
   const [baldes, setBaldes] = useState<SaldoBaldeDTO[]>([]);
   const [total, setTotal] = useState(0);
+  const [movimentos, setMovimentos] = useState<MovimentoReservaComBaldeDTO[]>([]);
   const [status, setStatus] = useState<Status>('loading');
 
   const carregar = useCallback(async () => {
     setStatus('loading');
     try {
-      const saldos = await reservasApi.saldos(competencia);
+      const [saldos, movimentosMes] = await Promise.all([
+        reservasApi.saldos(competencia),
+        reservasApi.movimentosDoMes(competencia),
+      ]);
       setBaldes(saldos.baldes);
       setTotal(saldos.total);
+      setMovimentos(movimentosMes);
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -116,6 +122,8 @@ export function ReservasView() {
                 />
               ))}
             </div>
+
+            <MovimentosMesLista competencia={competencia} movimentos={movimentos} />
           </div>
         ))}
     </main>

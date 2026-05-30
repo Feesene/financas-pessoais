@@ -141,6 +141,13 @@ export interface MovimentoReservaDTO {
   /** Mês de competência no formato AAAA-MM. */
   competencia: string;
   descricao: string | null;
+  /** Timestamp ISO 8601 de quando o movimento foi registrado. */
+  criadoEm: string;
+}
+
+/** Movimento de reserva acompanhado do nome do balde (lista por competência). */
+export interface MovimentoReservaComBaldeDTO extends MovimentoReservaDTO {
+  baldeNome: string;
 }
 
 /** Saldo de um balde até uma competência (leitura, derivado dos movimentos). */
