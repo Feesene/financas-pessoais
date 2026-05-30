@@ -25,6 +25,9 @@
     --accent: 220 14% 95%;
     --accent-foreground: 222 47% 11%;
 
+    --select-active: 222 47% 11%;
+    --select-active-foreground: 0 0% 100%;
+
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
@@ -59,6 +62,9 @@
 
     --accent: 215 28% 25%;
     --accent-foreground: 213 31% 91%;
+
+    --select-active: 199 89% 60%;
+    --select-active-foreground: 222 47% 11%;
 
     --destructive: 0 72% 65%;
     --destructive-foreground: 210 40% 98%;
