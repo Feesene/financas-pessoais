@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { LancamentoFormDialog } from './LancamentoFormDialog';
+import { PagamentoDialog } from './PagamentoDialog';
 
 interface Props {
   lancamento: LancamentoDTO;
@@ -28,8 +29,34 @@ interface Props {
 
 export function LancamentoItem({ lancamento, onAlterado }: Props) {
   const [excluindo, setExcluindo] = useState(false);
+  const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
+  const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const receita = lancamento.tipo === 'RECEITA';
   const deRegra = lancamento.origemRegraId !== null;
+  const pago = lancamento.pago;
+  const valorReal = pago && lancamento.valorPago !== null ? lancamento.valorPago : lancamento.valor;
+  const mostraReal = pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
+
+  function aoAlternarPago(marcando: boolean) {
+    if (marcando) {
+      setPagamentoAberto(true);
+    } else {
+      desmarcarPagamento();
+    }
+  }
+
+  async function desmarcarPagamento() {
+    setRegistrandoPagamento(true);
+    try {
+      await lancamentosApi.registrarPagamento(lancamento.id, { pago: false });
+      toast.success('Pagamento desmarcado.');
+      onAlterado();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao desmarcar o pagamento.');
+    } finally {
+      setRegistrandoPagamento(false);
+    }
+  }
 
   async function excluir() {
     setExcluindo(true);
@@ -65,14 +92,37 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
         )}
       </div>
 
-      <span
-        className={cn(
-          'shrink-0 font-semibold tabular-nums',
-          receita ? 'text-success' : 'text-destructive',
+      {deRegra && (
+        <label
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
+          title="Marcar ocorrência como paga"
+        >
+          <input
+            type="checkbox"
+            className="h-4 w-4 cursor-pointer accent-primary"
+            checked={pago}
+            disabled={registrandoPagamento}
+            onChange={(e) => aoAlternarPago(e.target.checked)}
+          />
+          Pago
+        </label>
+      )}
+
+      <div className="flex shrink-0 flex-col items-end">
+        <span
+          className={cn(
+            'font-semibold tabular-nums',
+            receita ? 'text-success' : 'text-destructive',
+          )}
+        >
+          {receita ? '+' : '−'} {formatarReais(valorReal)}
+        </span>
+        {mostraReal && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            Previsto {formatarReais(lancamento.valor)}
+          </span>
         )}
-      >
-        {receita ? '+' : '−'} {formatarReais(lancamento.valor)}
-      </span>
+      </div>
 
       <div className="flex shrink-0 gap-1">
         <LancamentoFormDialog
@@ -122,6 +172,15 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {deRegra && (
+        <PagamentoDialog
+          lancamento={lancamento}
+          aberto={pagamentoAberto}
+          onOpenChange={setPagamentoAberto}
+          onRegistrado={onAlterado}
+        />
+      )}
     </div>
   );
 }

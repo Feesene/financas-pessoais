@@ -32,4 +32,10 @@ export class LancamentoSchema {
 
   @Column({ type: 'int', nullable: true })
   ocorrenciaIndice!: number | null;
+
+  @Column({ type: 'boolean', default: false })
+  pago!: boolean;
+
+  @Column({ type: 'numeric', precision: 12, scale: 2, nullable: true })
+  valorPago!: string | null;
 }

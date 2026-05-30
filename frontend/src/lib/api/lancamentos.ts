@@ -1,6 +1,7 @@
 import type {
   AtualizarLancamentoDTO,
   LancamentoDTO,
+  RegistrarPagamentoDTO,
   ResumoMensalDTO,
 } from '@financas-pessoais/shared';
 import { ApiError, request } from './http';
@@ -31,6 +32,13 @@ export const lancamentosApi = {
   atualizar(id: string, body: AtualizarLancamentoDTO): Promise<LancamentoDTO> {
     return request<LancamentoDTO>(`/lancamentos/${encodeURIComponent(id)}`, {
       method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  },
+
+  registrarPagamento(id: string, body: RegistrarPagamentoDTO): Promise<LancamentoDTO> {
+    return request<LancamentoDTO>(`/lancamentos/${encodeURIComponent(id)}/pagamento`, {
+      method: 'PATCH',
       body: JSON.stringify(body),
     });
   },

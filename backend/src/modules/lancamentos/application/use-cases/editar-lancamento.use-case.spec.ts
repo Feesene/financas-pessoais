@@ -59,6 +59,8 @@ describe('EditarLancamentoUseCase', () => {
       competencia: '2026-05',
       origemRegraId: null,
       ocorrenciaIndice: null,
+      pago: false,
+      valorPago: null,
     });
 
     const persistido = await repo.findById('l-1');

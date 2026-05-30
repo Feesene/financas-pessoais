@@ -18,7 +18,7 @@ export class ObterResumoMensalUseCase {
     let receitasEmCentavos = 0;
     let despesasEmCentavos = 0;
     for (const lancamento of lancamentos) {
-      const centavos = Math.round(lancamento.valor * 100);
+      const centavos = Math.round(lancamento.valorEfetivo * 100);
       if (lancamento.tipo === 'RECEITA') {
         receitasEmCentavos += centavos;
       } else {

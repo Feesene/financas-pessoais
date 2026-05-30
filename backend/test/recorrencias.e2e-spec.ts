@@ -19,6 +19,7 @@ import { ListarLancamentosUseCase } from '../src/modules/lancamentos/application
 import { EditarLancamentoUseCase } from '../src/modules/lancamentos/application/use-cases/editar-lancamento.use-case';
 import { ExcluirLancamentoUseCase } from '../src/modules/lancamentos/application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../src/modules/lancamentos/application/use-cases/obter-resumo-mensal.use-case';
+import { RegistrarPagamentoUseCase } from '../src/modules/lancamentos/application/use-cases/registrar-pagamento.use-case';
 import { LANCAMENTO_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/lancamento.repository';
 import { OCORRENCIA_EXCLUIDA_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/ocorrencia-excluida.repository';
 import { CATEGORIA_REPOSITORY } from '../src/modules/categorias/domain/repositories/categoria.repository';
@@ -52,6 +53,7 @@ describe('Recorrências (e2e)', () => {
         EditarLancamentoUseCase,
         ExcluirLancamentoUseCase,
         ObterResumoMensalUseCase,
+        RegistrarPagamentoUseCase,
         { provide: REGRA_RECORRENTE_REPOSITORY, useClass: InMemoryRegraRecorrenteRepository },
         { provide: LANCAMENTO_REPOSITORY, useClass: InMemoryLancamentoRepository },
         {

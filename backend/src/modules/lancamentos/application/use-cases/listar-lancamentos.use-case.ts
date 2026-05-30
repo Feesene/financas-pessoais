@@ -23,6 +23,8 @@ export class ListarLancamentosUseCase {
       competencia: l.competencia,
       origemRegraId: l.origemRegraId,
       ocorrenciaIndice: l.ocorrenciaIndice,
+      pago: l.pago,
+      valorPago: l.valorPago,
     }));
   }
 }

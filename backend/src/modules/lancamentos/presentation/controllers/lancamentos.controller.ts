@@ -7,6 +7,7 @@ import {
   HttpCode,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -17,10 +18,13 @@ import { ListarLancamentosUseCase } from '../../application/use-cases/listar-lan
 import { EditarLancamentoUseCase } from '../../application/use-cases/editar-lancamento.use-case';
 import { ExcluirLancamentoUseCase } from '../../application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../../application/use-cases/obter-resumo-mensal.use-case';
+import { RegistrarPagamentoUseCase } from '../../application/use-cases/registrar-pagamento.use-case';
 import { LancamentoNaoEncontradoError } from '../../application/errors/lancamento-nao-encontrado.error';
 import { CategoriaInexistenteError } from '../../application/errors/categoria-inexistente.error';
+import { LancamentoInvalidoError } from '../../domain/errors/lancamento-invalido.error';
 import { CriarLancamentoRequest } from '../dtos/criar-lancamento.request';
 import { AtualizarLancamentoRequest } from '../dtos/atualizar-lancamento.request';
+import { RegistrarPagamentoRequest } from '../dtos/registrar-pagamento.request';
 import { CompetenciaQueryRequest } from '../dtos/competencia-query.request';
 
 @Controller('lancamentos')
@@ -31,6 +35,7 @@ export class LancamentosController {
     private readonly editarLancamento: EditarLancamentoUseCase,
     private readonly excluirLancamento: ExcluirLancamentoUseCase,
     private readonly obterResumoMensal: ObterResumoMensalUseCase,
+    private readonly registrarPagamento: RegistrarPagamentoUseCase,
   ) {}
 
   @Post()
@@ -79,6 +84,22 @@ export class LancamentosController {
     }
   }
 
+  @Patch(':id/pagamento')
+  async pagamento(
+    @Param('id') id: string,
+    @Body() body: RegistrarPagamentoRequest,
+  ): Promise<LancamentoDTO> {
+    try {
+      return await this.registrarPagamento.execute({
+        id,
+        pago: body.pago,
+        valorPago: body.valorPago ?? null,
+      });
+    } catch (error) {
+      throw this.mapErro(error);
+    }
+  }
+
   @Delete(':id')
   @HttpCode(204)
   async excluir(@Param('id') id: string): Promise<void> {
@@ -94,6 +115,9 @@ export class LancamentosController {
       return new NotFoundException(error.message);
     }
     if (error instanceof CategoriaInexistenteError) {
+      return new BadRequestException(error.message);
+    }
+    if (error instanceof LancamentoInvalidoError) {
       return new BadRequestException(error.message);
     }
     return error;

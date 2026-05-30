@@ -24,6 +24,17 @@ export interface LancamentoDTO {
   origemRegraId: string | null;
   /** Índice (1-based) da ocorrência dentro da regra; null se manual. */
   ocorrenciaIndice: number | null;
+  /** true se a ocorrência (de recorrência) já foi paga. Sempre false em lançamentos manuais. */
+  pago: boolean;
+  /** Valor efetivamente pago (numeric 2 casas) ou null se ainda não pago / lançamento manual. */
+  valorPago: number | null;
+}
+
+/** Corpo do registro de pagamento de uma ocorrência recorrente. */
+export interface RegistrarPagamentoDTO {
+  pago: boolean;
+  /** Se ausente e pago=true, assume o valor previsto. */
+  valorPago?: number | null;
 }
 
 /** Frequência de uma regra recorrente. No MVP só mensal. */

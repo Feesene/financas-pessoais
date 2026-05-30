@@ -1,5 +1,6 @@
 import { Lancamento, type LancamentoProps } from './lancamento';
 import { LancamentoInvalidoError } from '../errors/lancamento-invalido.error';
+import { PagamentoLancamentoManualError } from '../errors/pagamento-lancamento-manual.error';
 
 function props(overrides: Partial<LancamentoProps> = {}): LancamentoProps {
   return {
@@ -73,5 +74,69 @@ describe('Lancamento.atualizar', () => {
         competencia: '2026-05',
       }),
     ).toThrow(LancamentoInvalidoError);
+  });
+
+  it('preserva pago/valorPago ao atualizar (PUT não toca no pagamento)', () => {
+    const original = Lancamento.criar(
+      props({ origemRegraId: 'regra-1', ocorrenciaIndice: 1, pago: true, valorPago: 237 }),
+    );
+    const atualizado = original.atualizar({
+      tipo: 'DESPESA',
+      categoria: 'Alimentação',
+      descricao: 'nova descrição',
+      valor: 200,
+      competencia: '2026-05',
+    });
+    expect(atualizado.pago).toBe(true);
+    expect(atualizado.valorPago).toBe(237);
+  });
+});
+
+describe('Lancamento pagamento e valorEfetivo', () => {
+  const ocorrencia = (overrides: Partial<LancamentoProps> = {}) =>
+    props({ origemRegraId: 'regra-1', ocorrenciaIndice: 1, valor: 200, ...overrides });
+
+  it('valorEfetivo usa o previsto enquanto não pago', () => {
+    const l = Lancamento.criar(ocorrencia());
+    expect(l.pago).toBe(false);
+    expect(l.valorPago).toBeNull();
+    expect(l.valorEfetivo).toBe(200);
+  });
+
+  it('valorEfetivo usa o valorPago quando pago', () => {
+    const l = Lancamento.criar(ocorrencia()).registrarPagamento(true, 237);
+    expect(l.pago).toBe(true);
+    expect(l.valorPago).toBe(237);
+    expect(l.valorEfetivo).toBe(237);
+  });
+
+  it('pago sem valorPago assume o previsto', () => {
+    const l = Lancamento.criar(ocorrencia()).registrarPagamento(true);
+    expect(l.valorPago).toBe(200);
+    expect(l.valorEfetivo).toBe(200);
+  });
+
+  it('desmarcar zera o valorPago e volta ao previsto', () => {
+    const pago = Lancamento.criar(ocorrencia()).registrarPagamento(true, 237);
+    const desmarcado = pago.registrarPagamento(false);
+    expect(desmarcado.pago).toBe(false);
+    expect(desmarcado.valorPago).toBeNull();
+    expect(desmarcado.valorEfetivo).toBe(200);
+  });
+
+  it('valorEfetivoComSinal acompanha o tipo', () => {
+    const despesa = Lancamento.criar(ocorrencia()).registrarPagamento(true, 237);
+    expect(despesa.valorEfetivoComSinal).toBe(-237);
+    const receita = Lancamento.criar(ocorrencia({ tipo: 'RECEITA' })).registrarPagamento(true, 237);
+    expect(receita.valorEfetivoComSinal).toBe(237);
+  });
+
+  it('rejeita marcar como pago um lançamento manual', () => {
+    const manual = Lancamento.criar(props());
+    expect(() => manual.registrarPagamento(true)).toThrow(PagamentoLancamentoManualError);
+  });
+
+  it('rejeita criar lançamento manual já pago', () => {
+    expect(() => Lancamento.criar(props({ pago: true }))).toThrow(PagamentoLancamentoManualError);
   });
 });

@@ -86,4 +86,62 @@ describe('ObterConsumoCategoriasUseCase', () => {
     const [consumo] = await useCase.execute(COMPETENCIA);
     expect(consumo.estourou).toBe(true);
   });
+
+  it('lançamento manual vinculado por categoriaId conta no consumo da meta', async () => {
+    await seedCategoria('desp', 'DESPESA');
+    await definirMeta.execute({ categoriaId: 'desp', competencia: COMPETENCIA, valor: 500 });
+    // Lançamento manual (sem origemRegraId) vinculado por categoriaId.
+    await lancamentos.save(
+      Lancamento.criar({
+        id: 'manual-1',
+        tipo: 'DESPESA',
+        categoria: 'desp',
+        categoriaId: 'desp',
+        descricao: 'compra avulsa',
+        valor: 300,
+        competencia: COMPETENCIA,
+      }),
+    );
+    const [consumo] = await useCase.execute(COMPETENCIA);
+    expect(consumo.gasto).toBe(300);
+    expect(consumo.percentual).toBeCloseTo(0.6);
+  });
+
+  it('soma o gasto pelo valor pago (valorEfetivo) de ocorrências pagas', async () => {
+    await seedCategoria('desp', 'DESPESA');
+    await definirMeta.execute({ categoriaId: 'desp', competencia: COMPETENCIA, valor: 500 });
+    await lancamentos.save(
+      Lancamento.criar({
+        id: 'ocorrencia-1',
+        tipo: 'DESPESA',
+        categoria: 'desp',
+        categoriaId: 'desp',
+        descricao: null,
+        valor: 200,
+        competencia: COMPETENCIA,
+        origemRegraId: 'regra-1',
+        ocorrenciaIndice: 1,
+      }).registrarPagamento(true, 237),
+    );
+    const [consumo] = await useCase.execute(COMPETENCIA);
+    expect(consumo.gasto).toBe(237);
+  });
+
+  it('lançamento sem categoriaId (texto livre) não conta no consumo da categoria', async () => {
+    await seedCategoria('desp', 'DESPESA');
+    await definirMeta.execute({ categoriaId: 'desp', competencia: COMPETENCIA, valor: 500 });
+    await lancamentos.save(
+      Lancamento.criar({
+        id: 'avulso-1',
+        tipo: 'DESPESA',
+        categoria: 'qualquer texto',
+        categoriaId: null,
+        descricao: null,
+        valor: 200,
+        competencia: COMPETENCIA,
+      }),
+    );
+    const [consumo] = await useCase.execute(COMPETENCIA);
+    expect(consumo.gasto).toBe(0);
+  });
 });

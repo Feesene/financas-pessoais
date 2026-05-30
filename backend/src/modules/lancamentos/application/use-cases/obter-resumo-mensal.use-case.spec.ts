@@ -59,6 +59,20 @@ describe('ObterResumoMensalUseCase', () => {
     expect(resumo.saldo).toBe(-0.3);
   });
 
+  it('usa o valor pago (valorEfetivo) quando a ocorrência foi marcada como paga', async () => {
+    const ocorrencia = lancamento({
+      tipo: 'DESPESA',
+      valor: 200,
+      origemRegraId: 'regra-1',
+      ocorrenciaIndice: 1,
+    }).registrarPagamento(true, 237);
+    await repo.save(ocorrencia);
+
+    const resumo = await useCase.execute('2026-05');
+
+    expect(resumo.totalDespesas).toBe(237);
+  });
+
   it('considera apenas lançamentos da competência solicitada', async () => {
     await repo.save(lancamento({ tipo: 'RECEITA', valor: 100, competencia: '2026-05' }));
     await repo.save(lancamento({ tipo: 'RECEITA', valor: 999, competencia: '2026-06' }));

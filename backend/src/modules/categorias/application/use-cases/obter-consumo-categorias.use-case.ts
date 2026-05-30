@@ -33,7 +33,7 @@ export class ObterConsumoCategoriasUseCase {
     for (const lancamento of lancamentos) {
       if (lancamento.tipo !== 'DESPESA' || lancamento.categoriaId === null) continue;
       const atual = gastoEmCentavos.get(lancamento.categoriaId) ?? 0;
-      gastoEmCentavos.set(lancamento.categoriaId, atual + Math.round(lancamento.valor * 100));
+      gastoEmCentavos.set(lancamento.categoriaId, atual + Math.round(lancamento.valorEfetivo * 100));
     }
 
     return categorias

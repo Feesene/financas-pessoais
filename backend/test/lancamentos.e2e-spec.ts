@@ -8,7 +8,12 @@ import { ListarLancamentosUseCase } from '../src/modules/lancamentos/application
 import { EditarLancamentoUseCase } from '../src/modules/lancamentos/application/use-cases/editar-lancamento.use-case';
 import { ExcluirLancamentoUseCase } from '../src/modules/lancamentos/application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../src/modules/lancamentos/application/use-cases/obter-resumo-mensal.use-case';
-import { LANCAMENTO_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/lancamento.repository';
+import { RegistrarPagamentoUseCase } from '../src/modules/lancamentos/application/use-cases/registrar-pagamento.use-case';
+import { Lancamento } from '../src/modules/lancamentos/domain/entities/lancamento';
+import {
+  LANCAMENTO_REPOSITORY,
+  type LancamentoRepository,
+} from '../src/modules/lancamentos/domain/repositories/lancamento.repository';
 import { OCORRENCIA_EXCLUIDA_REPOSITORY } from '../src/modules/lancamentos/domain/repositories/ocorrencia-excluida.repository';
 import { CATEGORIA_REPOSITORY } from '../src/modules/categorias/domain/repositories/categoria.repository';
 import { InMemoryLancamentoRepository } from './in-memory-lancamento.repository';
@@ -19,6 +24,7 @@ const COMPETENCIA = '2026-08';
 
 describe('Lançamentos (e2e)', () => {
   let app: INestApplication;
+  let repo: LancamentoRepository;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -29,6 +35,7 @@ describe('Lançamentos (e2e)', () => {
         EditarLancamentoUseCase,
         ExcluirLancamentoUseCase,
         ObterResumoMensalUseCase,
+        RegistrarPagamentoUseCase,
         { provide: LANCAMENTO_REPOSITORY, useClass: InMemoryLancamentoRepository },
         {
           provide: OCORRENCIA_EXCLUIDA_REPOSITORY,
@@ -41,6 +48,8 @@ describe('Lançamentos (e2e)', () => {
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
+
+    repo = moduleRef.get<LancamentoRepository>(LANCAMENTO_REPOSITORY);
   });
 
   afterAll(async () => {
@@ -134,5 +143,85 @@ describe('Lançamentos (e2e)', () => {
 
   it('retorna 404 ao excluir um id inexistente', async () => {
     await request(server()).delete('/lancamentos/nao-existe').expect(404);
+  });
+
+  describe('PATCH /lancamentos/:id/pagamento', () => {
+    const PAG_COMPETENCIA = '2026-09';
+
+    async function seedOcorrencia(id: string): Promise<void> {
+      await repo.save(
+        Lancamento.criar({
+          id,
+          tipo: 'DESPESA',
+          categoria: 'Luz',
+          categoriaId: null,
+          descricao: 'Conta de luz',
+          valor: 200,
+          competencia: PAG_COMPETENCIA,
+          origemRegraId: 'regra-1',
+          ocorrenciaIndice: 1,
+        }),
+      );
+    }
+
+    it('marca uma ocorrência como paga com o valor real e o resumo reflete', async () => {
+      await seedOcorrencia('oco-pag-1');
+
+      const resp = await request(server())
+        .patch('/lancamentos/oco-pag-1/pagamento')
+        .send({ pago: true, valorPago: 237 })
+        .expect(200);
+      expect(resp.body).toMatchObject({ pago: true, valorPago: 237 });
+
+      const resumo = await request(server())
+        .get(`/lancamentos/resumo?competencia=${PAG_COMPETENCIA}`)
+        .expect(200);
+      expect(resumo.body).toMatchObject({ totalDespesas: 237 });
+    });
+
+    it('desmarcar volta o resumo ao previsto', async () => {
+      await seedOcorrencia('oco-pag-2');
+      await request(server())
+        .patch('/lancamentos/oco-pag-2/pagamento')
+        .send({ pago: true, valorPago: 500 })
+        .expect(200);
+      await request(server())
+        .patch('/lancamentos/oco-pag-2/pagamento')
+        .send({ pago: false })
+        .expect(200);
+
+      const lancamento = await repo.findById('oco-pag-2');
+      expect(lancamento?.pago).toBe(false);
+      expect(lancamento?.valorPago).toBeNull();
+      expect(lancamento?.valorEfetivo).toBe(200);
+    });
+
+    it('rejeita (400) marcar lançamento manual como pago', async () => {
+      const manual = await request(server())
+        .post('/lancamentos')
+        .send({ tipo: 'DESPESA', categoria: 'Avulso', valor: 50, competencia: PAG_COMPETENCIA })
+        .expect(201);
+      const manualId = (manual.body as LancamentoDTO).id;
+
+      await request(server())
+        .patch(`/lancamentos/${manualId}/pagamento`)
+        .send({ pago: true })
+        .expect(400);
+    });
+
+    it('retorna 404 ao pagar um id inexistente', async () => {
+      await request(server())
+        .patch('/lancamentos/nao-existe/pagamento')
+        .send({ pago: true })
+        .expect(404);
+    });
+
+    it('rejeita (400) valorPago menor ou igual a zero', async () => {
+      await seedOcorrencia('oco-pag-3');
+      await request(server())
+        .patch('/lancamentos/oco-pag-3/pagamento')
+        .send({ pago: true, valorPago: 0 })
+        .expect(400);
+    });
   });
 });

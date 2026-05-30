@@ -47,6 +47,8 @@ export class CriarLancamentoUseCase {
       competencia: lancamento.competencia,
       origemRegraId: lancamento.origemRegraId,
       ocorrenciaIndice: lancamento.ocorrenciaIndice,
+      pago: lancamento.pago,
+      valorPago: lancamento.valorPago,
     };
   }
 }

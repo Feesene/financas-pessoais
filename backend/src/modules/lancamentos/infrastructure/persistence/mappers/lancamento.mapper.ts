@@ -14,6 +14,8 @@ export class LancamentoMapper {
       competencia: schema.competencia,
       origemRegraId: schema.origemRegraId,
       ocorrenciaIndice: schema.ocorrenciaIndice,
+      pago: schema.pago ?? false,
+      valorPago: schema.valorPago === null ? null : Number(schema.valorPago),
     });
   }
 
@@ -28,6 +30,8 @@ export class LancamentoMapper {
     schema.competencia = lancamento.competencia;
     schema.origemRegraId = lancamento.origemRegraId;
     schema.ocorrenciaIndice = lancamento.ocorrenciaIndice;
+    schema.pago = lancamento.pago;
+    schema.valorPago = lancamento.valorPago === null ? null : lancamento.valorPago.toFixed(2);
     return schema;
   }
 }
