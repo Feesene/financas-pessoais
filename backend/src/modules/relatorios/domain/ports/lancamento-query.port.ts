@@ -13,6 +13,16 @@ export interface DespesaPorCategoria {
   total: number;
 }
 
+/** Totais previsto (valor) e pago (valorEfetivo com pago=true) por competência. */
+export interface PrevistoPagoCompetencia {
+  /** Mês de competência no formato AAAA-MM. */
+  competencia: string;
+  receitasPrevisto: number;
+  receitasPago: number;
+  despesasPrevisto: number;
+  despesasPago: number;
+}
+
 /**
  * Consulta de lançamentos (P1) usada por relatórios.
  * Implementada na infraestrutura como Anti-Corruption Layer sobre o repositório real.
@@ -22,6 +32,8 @@ export interface LancamentoQueryPort {
   somarPorTipoECompetencia(de: string, ate: string): Promise<SomaTipoCompetencia[]>;
   /** Soma despesas agrupadas por categoriaId no intervalo [de, ate]. */
   somarDespesaPorCategoria(de: string, ate: string): Promise<DespesaPorCategoria[]>;
+  /** Soma previsto e pago de receitas/despesas por competência no intervalo [de, ate]. */
+  somarPrevistoPagoPorCompetencia(de: string, ate: string): Promise<PrevistoPagoCompetencia[]>;
 }
 
 export const LANCAMENTO_QUERY_PORT = Symbol('LancamentoQueryPort');

@@ -7,6 +7,7 @@ import { intervaloCompetencias } from '../../domain/competencia';
 import type {
   DespesaPorCategoria,
   LancamentoQueryPort,
+  PrevistoPagoCompetencia,
   SomaTipoCompetencia,
 } from '../../domain/ports/lancamento-query.port';
 
@@ -26,7 +27,7 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
         let receitasCentavos = 0;
         let despesasCentavos = 0;
         for (const lancamento of lancamentos) {
-          const centavos = Math.round(lancamento.valor * 100);
+          const centavos = Math.round(lancamento.valorEfetivo * 100);
           if (lancamento.tipo === 'RECEITA') receitasCentavos += centavos;
           else despesasCentavos += centavos;
         }
@@ -52,7 +53,10 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
       for (const lancamento of lancamentos) {
         if (lancamento.tipo !== 'DESPESA') continue;
         const chave = lancamento.categoriaId;
-        porCategoria.set(chave, (porCategoria.get(chave) ?? 0) + Math.round(lancamento.valor * 100));
+        porCategoria.set(
+          chave,
+          (porCategoria.get(chave) ?? 0) + Math.round(lancamento.valorEfetivo * 100),
+        );
       }
     }
 
@@ -60,5 +64,41 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
       categoriaId,
       total: centavos / 100,
     }));
+  }
+
+  async somarPrevistoPagoPorCompetencia(
+    de: string,
+    ate: string,
+  ): Promise<PrevistoPagoCompetencia[]> {
+    const competencias = intervaloCompetencias(de, ate);
+    const porMes = await Promise.all(
+      competencias.map(async (competencia) => {
+        const lancamentos = await this.lancamentos.findByCompetencia(competencia);
+        if (lancamentos.length === 0) return null;
+        let receitasPrevisto = 0;
+        let receitasPago = 0;
+        let despesasPrevisto = 0;
+        let despesasPago = 0;
+        for (const lancamento of lancamentos) {
+          const previsto = Math.round(lancamento.valor * 100);
+          const pago = lancamento.pago ? Math.round(lancamento.valorEfetivo * 100) : 0;
+          if (lancamento.tipo === 'RECEITA') {
+            receitasPrevisto += previsto;
+            receitasPago += pago;
+          } else {
+            despesasPrevisto += previsto;
+            despesasPago += pago;
+          }
+        }
+        return {
+          competencia,
+          receitasPrevisto: receitasPrevisto / 100,
+          receitasPago: receitasPago / 100,
+          despesasPrevisto: despesasPrevisto / 100,
+          despesasPago: despesasPago / 100,
+        };
+      }),
+    );
+    return porMes.filter((m): m is PrevistoPagoCompetencia => m !== null);
   }
 }

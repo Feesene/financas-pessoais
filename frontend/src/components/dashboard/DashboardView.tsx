@@ -22,12 +22,17 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
+  Bar,
+  Legend,
 } from 'recharts';
 import type {
   ConsumoCategoriaDTO,
   EvolucaoMensalItemDTO,
+  EvolucaoReservaItemDTO,
   GastoPorCategoriaItemDTO,
   PosicaoCarteiraDTO,
+  PrevistoPagoItemDTO,
   ResumoMensalDTO,
   SaldosReservaDTO,
 } from '@financas-pessoais/shared';
@@ -57,6 +62,8 @@ interface DashboardData {
   porCategoria: GastoPorCategoriaItemDTO[];
   reservas: SaldosReservaDTO;
   carteira: PosicaoCarteiraDTO;
+  evolucaoReservas: EvolucaoReservaItemDTO[];
+  previstoPago: PrevistoPagoItemDTO[];
 }
 
 const CORES_FALLBACK = [
@@ -68,6 +75,10 @@ function subtrairMeses(competencia: string, n: number): string {
   let c = competencia;
   for (let i = 0; i < n; i++) c = mesAnterior(c);
   return c;
+}
+
+function competenciasDoAno(ano: number): string[] {
+  return Array.from({ length: 12 }, (_, i) => `${ano}-${String(i + 1).padStart(2, '0')}`);
 }
 
 export function DashboardView() {
@@ -91,18 +102,41 @@ export function DashboardView() {
   const carregar = useCallback(async () => {
     setStatus('loading');
     try {
-      try { await recorrenciasApi.materializar(competencia); } catch { /* idempotente */ }
+      const ano = Number(competencia.slice(0, 4));
+      await Promise.allSettled(
+        competenciasDoAno(ano).map((c) => recorrenciasApi.materializar(c)),
+      );
 
       const inicio6m = subtrairMeses(competencia, 5);
-      const [resumo, consumo, evolucao, porCategoria, reservas, carteira] = await Promise.all([
+      const [
+        resumo,
+        consumo,
+        evolucao,
+        porCategoria,
+        reservas,
+        carteira,
+        evolucaoReservas,
+        previstoPago,
+      ] = await Promise.all([
         lancamentosApi.resumo(competencia),
         categoriasApi.consumo(competencia),
         relatoriosApi.evolucao(inicio6m, competencia),
         relatoriosApi.porCategoria(competencia, competencia),
         reservasApi.saldos(),
         investimentosApi.posicao(),
+        reservasApi.evolucaoAnual(ano),
+        relatoriosApi.previstoPago(`${ano}-01`, `${ano}-12`),
       ]);
-      setDados({ resumo, consumo, evolucao, porCategoria, reservas, carteira });
+      setDados({
+        resumo,
+        consumo,
+        evolucao,
+        porCategoria,
+        reservas,
+        carteira,
+        evolucaoReservas,
+        previstoPago,
+      });
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -216,6 +250,27 @@ export function DashboardView() {
               </CardHeader>
               <CardContent>
                 <GraficoCategoria dados={dados.porCategoria} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Annual charts row */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Reservas por mês — {competencia.slice(0, 4)}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <GraficoReservas dados={dados.evolucaoReservas} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Previsto vs pago — {competencia.slice(0, 4)}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <GraficoPrevistoPago dados={dados.previstoPago} />
               </CardContent>
             </Card>
           </div>
@@ -352,6 +407,76 @@ function GraficoCategoria({ dados }: { dados: GastoPorCategoriaItemDTO[] }) {
   );
 }
 
+function GraficoReservas({ dados }: { dados: EvolucaoReservaItemDTO[] }) {
+  const temDados = dados.some((p) => p.total !== 0);
+  if (!temDados) {
+    return (
+      <div className="flex h-52 items-center justify-center text-sm text-muted-foreground">
+        Sem reservas no período.
+      </div>
+    );
+  }
+  return (
+    <div className="h-52 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={dados} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <XAxis
+            dataKey="competencia"
+            tickFormatter={(c: string) => competenciaLabel(c).slice(0, 3)}
+            fontSize={11}
+            tickMargin={6}
+          />
+          <YAxis width={70} fontSize={11} tickFormatter={(v: number) => formatarReais(v)} />
+          <Tooltip
+            formatter={(v) => [formatarReais(Number(v)), 'Total reservado']}
+            labelFormatter={(l) => competenciaLabel(String(l))}
+          />
+          <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function GraficoPrevistoPago({ dados }: { dados: PrevistoPagoItemDTO[] }) {
+  const temDados = dados.some(
+    (p) => p.receitasPrevisto > 0 || p.despesasPrevisto > 0 || p.receitasPago > 0 || p.despesasPago > 0,
+  );
+  if (!temDados) {
+    return (
+      <div className="flex h-52 items-center justify-center text-sm text-muted-foreground">
+        Sem movimentação no ano.
+      </div>
+    );
+  }
+  return (
+    <div className="h-52 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={dados} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <XAxis
+            dataKey="competencia"
+            tickFormatter={(c: string) => competenciaLabel(c).slice(0, 3)}
+            fontSize={11}
+            tickMargin={6}
+          />
+          <YAxis width={70} fontSize={11} tickFormatter={(v: number) => formatarReais(v)} />
+          <Tooltip
+            formatter={(v, nome) => [formatarReais(Number(v)), rotuloPrevistoPago(String(nome))]}
+            labelFormatter={(l) => competenciaLabel(String(l))}
+          />
+          <Legend formatter={(value) => rotuloPrevistoPago(String(value))} />
+          <Bar dataKey="receitasPrevisto" fill="#86efac" />
+          <Bar dataKey="receitasPago" fill="#22c55e" />
+          <Bar dataKey="despesasPrevisto" fill="#fca5a5" />
+          <Bar dataKey="despesasPago" fill="#ef4444" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 function ConsumoGrid({ consumo }: { consumo: ConsumoCategoriaDTO[] }) {
   const comMeta = consumo.filter((c) => c.meta !== null);
   return (
@@ -391,6 +516,21 @@ function rotuloSerie(chave: string): string {
   if (chave === 'receitas') return 'Receitas';
   if (chave === 'despesas') return 'Despesas';
   return 'Saldo';
+}
+
+function rotuloPrevistoPago(chave: string): string {
+  switch (chave) {
+    case 'receitasPrevisto':
+      return 'Receitas (previsto)';
+    case 'receitasPago':
+      return 'Receitas (pago)';
+    case 'despesasPrevisto':
+      return 'Despesas (previsto)';
+    case 'despesasPago':
+      return 'Despesas (pago)';
+    default:
+      return chave;
+  }
 }
 
 function DashboardSkeleton() {

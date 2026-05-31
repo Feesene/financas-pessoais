@@ -4,6 +4,7 @@ import type {
   EvolucaoMensalItemDTO,
   FormatoExportacao,
   GastoPorCategoriaItemDTO,
+  PrevistoPagoItemDTO,
 } from '@financas-pessoais/shared';
 import { API_URL, ApiError, request } from './http';
 
@@ -26,6 +27,10 @@ export const relatoriosApi = {
 
   evolucao(de: string, ate: string): Promise<EvolucaoMensalItemDTO[]> {
     return request<EvolucaoMensalItemDTO[]>(`/relatorios/evolucao?${intervalo(de, ate)}`);
+  },
+
+  previstoPago(de: string, ate: string): Promise<PrevistoPagoItemDTO[]> {
+    return request<PrevistoPagoItemDTO[]>(`/relatorios/previsto-pago?${intervalo(de, ate)}`);
   },
 
   comparar(a: string, b: string): Promise<ComparacaoMesesDTO> {

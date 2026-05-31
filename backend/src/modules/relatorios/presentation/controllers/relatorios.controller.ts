@@ -12,10 +12,12 @@ import type {
   ConsolidadoDTO,
   EvolucaoMensalItemDTO,
   GastoPorCategoriaItemDTO,
+  PrevistoPagoItemDTO,
 } from '@financas-pessoais/shared';
 import { ObterConsolidadoUseCase } from '../../application/use-cases/obter-consolidado.use-case';
 import { ObterGastoPorCategoriaUseCase } from '../../application/use-cases/obter-gasto-por-categoria.use-case';
 import { ObterEvolucaoUseCase } from '../../application/use-cases/obter-evolucao.use-case';
+import { ObterPrevistoPagoUseCase } from '../../application/use-cases/obter-previsto-pago.use-case';
 import { CompararMesesUseCase } from '../../application/use-cases/comparar-meses.use-case';
 import { ExportacaoService } from '../../application/exportacao.service';
 import { IntervaloInvalidoError } from '../../application/errors/intervalo-invalido.error';
@@ -30,6 +32,7 @@ export class RelatoriosController {
     private readonly obterConsolidado: ObterConsolidadoUseCase,
     private readonly obterGastoPorCategoria: ObterGastoPorCategoriaUseCase,
     private readonly obterEvolucao: ObterEvolucaoUseCase,
+    private readonly obterPrevistoPago: ObterPrevistoPagoUseCase,
     private readonly compararMeses: CompararMesesUseCase,
     private readonly exportacao: ExportacaoService,
   ) {}
@@ -50,6 +53,11 @@ export class RelatoriosController {
   @Get('evolucao')
   async evolucao(@Query() query: IntervaloQueryRequest): Promise<EvolucaoMensalItemDTO[]> {
     return executar(() => this.obterEvolucao.execute(query.de, query.ate));
+  }
+
+  @Get('previsto-pago')
+  async previstoPago(@Query() query: IntervaloQueryRequest): Promise<PrevistoPagoItemDTO[]> {
+    return executar(() => this.obterPrevistoPago.execute(query.de, query.ate));
   }
 
   @Get('comparar')

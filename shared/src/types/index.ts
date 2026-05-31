@@ -174,6 +174,14 @@ export interface EvolucaoBaldeDTO {
   saldo: number;
 }
 
+/** Saldo reservado total acumulado (todos os baldes) ao fim de um mês do ano. */
+export interface EvolucaoReservaItemDTO {
+  /** Mês de competência no formato AAAA-MM. */
+  competencia: string;
+  /** Saldo reservado acumulado de todos os baldes ao fim do mês; pode ser negativo. */
+  total: number;
+}
+
 // ----------------------------------------------------------------------------
 // Carteira de investimentos (P6).
 // ----------------------------------------------------------------------------
@@ -320,6 +328,20 @@ export interface EvolucaoMensalItemDTO {
   despesas: number;
   /** receitas − despesas. */
   saldo: number;
+}
+
+/** Totais previsto e pago de receitas e despesas numa competência. */
+export interface PrevistoPagoItemDTO {
+  /** Mês de competência no formato AAAA-MM. */
+  competencia: string;
+  /** Σ `valor` de receitas da competência. */
+  receitasPrevisto: number;
+  /** Σ `valorEfetivo` de receitas com `pago = true`. */
+  receitasPago: number;
+  /** Σ `valor` de despesas da competência. */
+  despesasPrevisto: number;
+  /** Σ `valorEfetivo` de despesas com `pago = true`. */
+  despesasPago: number;
 }
 
 /** Comparação do gasto de uma categoria entre dois meses. */

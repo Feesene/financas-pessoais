@@ -75,7 +75,7 @@ const backend = startProcess('backend', path.join(rootDir, 'backend', 'main.js')
 const frontend = startProcess('frontend', findFrontendServer(), {
   NODE_ENV: 'production',
   PORT: '50080',
-  HOSTNAME: '127.0.0.1',
+  HOSTNAME: '0.0.0.0',
 });
 
 function shutdown(code = 0) {

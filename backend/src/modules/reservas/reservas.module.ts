@@ -13,6 +13,7 @@ import { EditarMovimentoUseCase } from './application/use-cases/editar-movimento
 import { ExcluirMovimentoUseCase } from './application/use-cases/excluir-movimento.use-case';
 import { ObterSaldosUseCase } from './application/use-cases/obter-saldos.use-case';
 import { ObterEvolucaoBaldeUseCase } from './application/use-cases/obter-evolucao-balde.use-case';
+import { ObterEvolucaoReservasUseCase } from './application/use-cases/obter-evolucao-reservas.use-case';
 import { BaldeSchema } from './infrastructure/persistence/entities/balde.schema';
 import { MovimentoReservaSchema } from './infrastructure/persistence/entities/movimento-reserva.schema';
 import { TypeOrmBaldeRepository } from './infrastructure/persistence/repositories/typeorm-balde.repository';
@@ -36,6 +37,7 @@ import { ReservasController } from './presentation/controllers/reservas.controll
     ExcluirMovimentoUseCase,
     ObterSaldosUseCase,
     ObterEvolucaoBaldeUseCase,
+    ObterEvolucaoReservasUseCase,
     { provide: BALDE_REPOSITORY, useClass: TypeOrmBaldeRepository },
     { provide: MOVIMENTO_RESERVA_REPOSITORY, useClass: TypeOrmMovimentoReservaRepository },
   ],

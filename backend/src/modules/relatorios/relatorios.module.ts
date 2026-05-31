@@ -11,6 +11,7 @@ import { ReservaQueryAdapter } from './infrastructure/adapters/reserva-query.ada
 import { ObterConsolidadoUseCase } from './application/use-cases/obter-consolidado.use-case';
 import { ObterGastoPorCategoriaUseCase } from './application/use-cases/obter-gasto-por-categoria.use-case';
 import { ObterEvolucaoUseCase } from './application/use-cases/obter-evolucao.use-case';
+import { ObterPrevistoPagoUseCase } from './application/use-cases/obter-previsto-pago.use-case';
 import { CompararMesesUseCase } from './application/use-cases/comparar-meses.use-case';
 import { ExportacaoService } from './application/exportacao.service';
 import { RelatoriosController } from './presentation/controllers/relatorios.controller';
@@ -22,6 +23,7 @@ import { RelatoriosController } from './presentation/controllers/relatorios.cont
     ObterConsolidadoUseCase,
     ObterGastoPorCategoriaUseCase,
     ObterEvolucaoUseCase,
+    ObterPrevistoPagoUseCase,
     CompararMesesUseCase,
     ExportacaoService,
     { provide: LANCAMENTO_QUERY_PORT, useClass: LancamentoQueryAdapter },

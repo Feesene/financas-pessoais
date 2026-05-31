@@ -17,6 +17,7 @@ function lancamentoPort(porMes: Record<string, DespesaPorCategoria[]>): Lancamen
   return {
     somarPorTipoECompetencia: async (): Promise<SomaTipoCompetencia[]> => [],
     somarDespesaPorCategoria: async (de) => porMes[de] ?? [],
+    somarPrevistoPagoPorCompetencia: async () => [],
   };
 }
 

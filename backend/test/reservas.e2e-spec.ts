@@ -21,6 +21,7 @@ import { EditarMovimentoUseCase } from '../src/modules/reservas/application/use-
 import { ExcluirMovimentoUseCase } from '../src/modules/reservas/application/use-cases/excluir-movimento.use-case';
 import { ObterSaldosUseCase } from '../src/modules/reservas/application/use-cases/obter-saldos.use-case';
 import { ObterEvolucaoBaldeUseCase } from '../src/modules/reservas/application/use-cases/obter-evolucao-balde.use-case';
+import { ObterEvolucaoReservasUseCase } from '../src/modules/reservas/application/use-cases/obter-evolucao-reservas.use-case';
 import { BALDE_REPOSITORY } from '../src/modules/reservas/domain/repositories/balde.repository';
 import { MOVIMENTO_RESERVA_REPOSITORY } from '../src/modules/reservas/domain/repositories/movimento-reserva.repository';
 import { InMemoryBaldeRepository } from './in-memory-balde.repository';
@@ -44,6 +45,7 @@ describe('Reservas (e2e)', () => {
         ExcluirMovimentoUseCase,
         ObterSaldosUseCase,
         ObterEvolucaoBaldeUseCase,
+        ObterEvolucaoReservasUseCase,
         { provide: BALDE_REPOSITORY, useClass: InMemoryBaldeRepository },
         { provide: MOVIMENTO_RESERVA_REPOSITORY, useClass: InMemoryMovimentoReservaRepository },
       ],

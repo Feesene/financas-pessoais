@@ -15,6 +15,7 @@ function lancamentoPort(despesas: DespesaPorCategoria[]): LancamentoQueryPort {
   return {
     somarPorTipoECompetencia: async (): Promise<SomaTipoCompetencia[]> => [],
     somarDespesaPorCategoria: async () => despesas,
+    somarPrevistoPagoPorCompetencia: async () => [],
   };
 }
 

@@ -6,6 +6,7 @@ import { RelatoriosController } from '../src/modules/relatorios/presentation/con
 import { ObterConsolidadoUseCase } from '../src/modules/relatorios/application/use-cases/obter-consolidado.use-case';
 import { ObterGastoPorCategoriaUseCase } from '../src/modules/relatorios/application/use-cases/obter-gasto-por-categoria.use-case';
 import { ObterEvolucaoUseCase } from '../src/modules/relatorios/application/use-cases/obter-evolucao.use-case';
+import { ObterPrevistoPagoUseCase } from '../src/modules/relatorios/application/use-cases/obter-previsto-pago.use-case';
 import { CompararMesesUseCase } from '../src/modules/relatorios/application/use-cases/comparar-meses.use-case';
 import { ExportacaoService } from '../src/modules/relatorios/application/exportacao.service';
 import { LANCAMENTO_QUERY_PORT } from '../src/modules/relatorios/domain/ports/lancamento-query.port';
@@ -41,6 +42,7 @@ describe('Relatorios (e2e)', () => {
         ObterConsolidadoUseCase,
         ObterGastoPorCategoriaUseCase,
         ObterEvolucaoUseCase,
+        ObterPrevistoPagoUseCase,
         CompararMesesUseCase,
         ExportacaoService,
         { provide: LANCAMENTO_QUERY_PORT, useClass: LancamentoQueryAdapter },
