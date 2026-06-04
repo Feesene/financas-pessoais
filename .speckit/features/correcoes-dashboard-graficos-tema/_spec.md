@@ -239,11 +239,11 @@ Nenhuma entidade de domínio é criada ou alterada (sem migração). Os itens 3.
 - [x] **B1.** `EvolucaoReservaItemDTO` em `shared/src/types/index.ts` + rebuild do `shared`. *(sem dependências)*
 - [x] **B2.** `ObterEvolucaoReservasUseCase` (saldo acumulado de todos os baldes por mês Jan–Dez, em centavos) + spec; registrar no módulo de reservas. *(depende de B1)*
 - [x] **B3.** Endpoint `GET /reservas/evolucao-anual?ano=` no `ReservasController` com DTO de query validando `ano`. *(depende de B2)*
-- [ ] **B4.** Frontend: `reservasApi.evolucaoAnual(ano)` em `reservas.ts` + card com `LineChart` "Total reservado" em `DashboardView.tsx` (carregado no `Promise.all`, com estado vazio). *(depende de B3)*
+- [x] **B4.** Frontend: `reservasApi.evolucaoAnual(ano)` em `reservas.ts` + card com `LineChart` "Total reservado" em `DashboardView.tsx` (carregado no `Promise.all`, com estado vazio). *(depende de B3)*
 
 **Bloco C — Gráfico previsto vs pago por mês do ano**
 
 - [x] **C1.** `PrevistoPagoItemDTO` em `shared/src/types/index.ts` + `PrevistoPagoCompetencia` na porta `LancamentoQueryPort` (assinatura `somarPrevistoPagoPorCompetencia`); rebuild do `shared`. *(sem dependências)*
 - [x] **C2.** Implementar `somarPrevistoPagoPorCompetencia` no `LancamentoQueryAdapter` (previsto = Σ `valor`; pago = Σ `valorEfetivo` com `pago === true`, por tipo, em centavos). *(depende de C1, A2)*
 - [x] **C3.** `ObterPrevistoPagoUseCase` (série contínua) + spec + endpoint `GET /relatorios/previsto-pago?de=&ate=` no `RelatoriosController`; registrar no módulo. *(depende de C2)*
-- [ ] **C4.** Frontend: `relatoriosApi.previstoPago(de, ate)` em `relatorios.ts` + `BarChart` agrupado (receitas/despesas × previsto/pago) em `DashboardView.tsx`, carregado para o ano corrente (`${ano}-01`..`${ano}-12`), com estado vazio. *(depende de C3, A3)*
+- [x] **C4.** Frontend: `relatoriosApi.previstoPago(de, ate)` em `relatorios.ts` + `BarChart` agrupado (receitas/despesas × previsto/pago) em `DashboardView.tsx`, carregado para o ano corrente (`${ano}-01`..`${ano}-12`), com estado vazio. *(depende de C3, A3)*

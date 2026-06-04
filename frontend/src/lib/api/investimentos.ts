@@ -9,7 +9,8 @@ import type {
   TipoAtivo,
   TipoMovimentoCarteira,
 } from '@financas-pessoais/shared';
-import { request } from './http';
+import { unwrap } from './http';
+import * as actions from './actions/investimentos';
 
 export interface CriarAtivoBody {
   tipo: TipoAtivo;
@@ -36,83 +37,58 @@ export interface MovimentoCarteiraBody {
 }
 
 export const investimentosApi = {
-  posicao(): Promise<PosicaoCarteiraDTO> {
-    return request<PosicaoCarteiraDTO>('/carteira/posicao');
+  async posicao(): Promise<PosicaoCarteiraDTO> {
+    return unwrap(await actions.posicaoCarteira());
   },
 
-  historico(de?: string, ate?: string): Promise<HistoricoCarteiraItemDTO[]> {
-    const params = new URLSearchParams();
-    if (de) params.set('de', de);
-    if (ate) params.set('ate', ate);
-    const qs = params.toString() ? `?${params.toString()}` : '';
-    return request<HistoricoCarteiraItemDTO[]>(`/carteira/historico${qs}`);
+  async historico(de?: string, ate?: string): Promise<HistoricoCarteiraItemDTO[]> {
+    return unwrap(await actions.historicoCarteira(de, ate));
   },
 
-  criarAtivo(body: CriarAtivoBody): Promise<AtivoDTO> {
-    return request<AtivoDTO>('/ativos', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async criarAtivo(body: CriarAtivoBody): Promise<AtivoDTO> {
+    return unwrap(await actions.criarAtivo(body));
   },
 
-  atualizarAtivo(id: string, body: AtualizarAtivoBody): Promise<AtivoDTO> {
-    return request<AtivoDTO>(`/ativos/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizarAtivo(id: string, body: AtualizarAtivoBody): Promise<AtivoDTO> {
+    return unwrap(await actions.atualizarAtivo(id, body));
   },
 
-  excluirAtivo(id: string): Promise<void> {
-    return request<void>(`/ativos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  async excluirAtivo(id: string): Promise<void> {
+    return unwrap(await actions.excluirAtivo(id));
   },
 
-  registrarMovimento(ativoId: string, body: MovimentoCarteiraBody): Promise<MovimentoCarteiraDTO> {
-    return request<MovimentoCarteiraDTO>(
-      `/ativos/${encodeURIComponent(ativoId)}/movimentos`,
-      {
-        method: 'POST',
-        body: JSON.stringify(body),
-      },
-    );
+  async registrarMovimento(
+    ativoId: string,
+    body: MovimentoCarteiraBody,
+  ): Promise<MovimentoCarteiraDTO> {
+    return unwrap(await actions.registrarMovimentoCarteira(ativoId, body));
   },
 
-  atualizarMovimento(id: string, body: MovimentoCarteiraBody): Promise<MovimentoCarteiraDTO> {
-    return request<MovimentoCarteiraDTO>(`/movimentos-carteira/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizarMovimento(id: string, body: MovimentoCarteiraBody): Promise<MovimentoCarteiraDTO> {
+    return unwrap(await actions.atualizarMovimentoCarteira(id, body));
   },
 
-  excluirMovimento(id: string): Promise<void> {
-    return request<void>(`/movimentos-carteira/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  async excluirMovimento(id: string): Promise<void> {
+    return unwrap(await actions.excluirMovimentoCarteira(id));
   },
 
-  registrarCotacao(
+  async registrarCotacao(
     ativoId: string,
     competencia: string,
     body: RegistrarCotacaoDTO,
   ): Promise<CotacaoAtivoDTO> {
-    return request<CotacaoAtivoDTO>(
-      `/ativos/${encodeURIComponent(ativoId)}/cotacoes/${encodeURIComponent(competencia)}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(body),
-      },
-    );
+    return unwrap(await actions.registrarCotacao(ativoId, competencia, body));
   },
 
-  listarCotacoes(ativoId: string): Promise<CotacaoAtivoDTO[]> {
-    return request<CotacaoAtivoDTO[]>(`/ativos/${encodeURIComponent(ativoId)}/cotacoes`);
+  async listarCotacoes(ativoId: string): Promise<CotacaoAtivoDTO[]> {
+    return unwrap(await actions.listarCotacoes(ativoId));
   },
 
-  obterEvolucao(ativoId: string): Promise<EvolucaoAtivoItemDTO[]> {
-    return request<EvolucaoAtivoItemDTO[]>(`/ativos/${encodeURIComponent(ativoId)}/evolucao`);
+  async obterEvolucao(ativoId: string): Promise<EvolucaoAtivoItemDTO[]> {
+    return unwrap(await actions.obterEvolucaoAtivo(ativoId));
   },
 
-  excluirCotacao(ativoId: string, competencia: string): Promise<void> {
-    return request<void>(
-      `/ativos/${encodeURIComponent(ativoId)}/cotacoes/${encodeURIComponent(competencia)}`,
-      { method: 'DELETE' },
-    );
+  async excluirCotacao(ativoId: string, competencia: string): Promise<void> {
+    return unwrap(await actions.excluirCotacao(ativoId, competencia));
   },
 };

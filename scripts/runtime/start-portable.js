@@ -6,6 +6,10 @@ const rootDir = path.resolve(__dirname, '..', '..');
 const nodePath = existsSync(path.join(rootDir, 'runtime', 'node.exe')) ? path.join(rootDir, 'runtime', 'node.exe') : process.execPath;
 const logsDir = path.join(rootDir, 'logs');
 const dataDir = path.join(rootDir, 'data');
+const backendPort = '50081';
+const frontendPort = '50080';
+const backendUrl = `http://127.0.0.1:${backendPort}`;
+const frontendUrl = `http://127.0.0.1:${frontendPort}`;
 
 mkdirSync(logsDir, { recursive: true });
 mkdirSync(dataDir, { recursive: true });
@@ -66,7 +70,7 @@ function openBrowser(url) {
 let shuttingDown = false;
 const backend = startProcess('backend', path.join(rootDir, 'backend', 'main.js'), {
   NODE_ENV: 'production',
-  PORT: '50081',
+  PORT: backendPort,
   DATABASE_TYPE: 'sqlite',
   DATABASE_PATH: path.join(dataDir, 'financas.db'),
   DB_SYNCHRONIZE: 'true',
@@ -74,8 +78,10 @@ const backend = startProcess('backend', path.join(rootDir, 'backend', 'main.js')
 
 const frontend = startProcess('frontend', findFrontendServer(), {
   NODE_ENV: 'production',
-  PORT: '50080',
+  PORT: frontendPort,
   HOSTNAME: '0.0.0.0',
+  API_URL: backendUrl,
+  NEXT_PUBLIC_API_URL: backendUrl,
 });
 
 function shutdown(code = 0) {
@@ -96,7 +102,7 @@ process.on('SIGINT', () => shutdown(0));
 process.on('SIGTERM', () => shutdown(0));
 
 if (process.env.NO_OPEN !== '1') {
-  setTimeout(() => openBrowser('http://127.0.0.1:50080'), 50080);
+  setTimeout(() => openBrowser(frontendUrl), 3000);
 }
-console.log('App iniciado em http://127.0.0.1:50080');
+console.log(`App iniciado em ${frontendUrl}`);
 console.log('Feche esta janela para encerrar os servidores locais.');

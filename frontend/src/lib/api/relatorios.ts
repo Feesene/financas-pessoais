@@ -6,48 +6,45 @@ import type {
   GastoPorCategoriaItemDTO,
   PrevistoPagoItemDTO,
 } from '@financas-pessoais/shared';
-import { API_URL, ApiError, request } from './http';
-
-function intervalo(de: string, ate: string): string {
-  return `de=${encodeURIComponent(de)}&ate=${encodeURIComponent(ate)}`;
-}
+import { unwrap } from './http';
+import * as actions from './actions/relatorios';
 
 export const relatoriosApi = {
-  consolidadoPorAno(ano: number): Promise<ConsolidadoDTO> {
-    return request<ConsolidadoDTO>(`/relatorios/consolidado?ano=${ano}`);
+  async consolidadoPorAno(ano: number): Promise<ConsolidadoDTO> {
+    return unwrap(await actions.consolidadoPorAno(ano));
   },
 
-  consolidado(de: string, ate: string): Promise<ConsolidadoDTO> {
-    return request<ConsolidadoDTO>(`/relatorios/consolidado?${intervalo(de, ate)}`);
+  async consolidado(de: string, ate: string): Promise<ConsolidadoDTO> {
+    return unwrap(await actions.consolidadoPorIntervalo(de, ate));
   },
 
-  porCategoria(de: string, ate: string): Promise<GastoPorCategoriaItemDTO[]> {
-    return request<GastoPorCategoriaItemDTO[]>(`/relatorios/por-categoria?${intervalo(de, ate)}`);
+  async porCategoria(de: string, ate: string): Promise<GastoPorCategoriaItemDTO[]> {
+    return unwrap(await actions.porCategoria(de, ate));
   },
 
-  evolucao(de: string, ate: string): Promise<EvolucaoMensalItemDTO[]> {
-    return request<EvolucaoMensalItemDTO[]>(`/relatorios/evolucao?${intervalo(de, ate)}`);
+  async evolucao(de: string, ate: string): Promise<EvolucaoMensalItemDTO[]> {
+    return unwrap(await actions.evolucao(de, ate));
   },
 
-  previstoPago(de: string, ate: string): Promise<PrevistoPagoItemDTO[]> {
-    return request<PrevistoPagoItemDTO[]>(`/relatorios/previsto-pago?${intervalo(de, ate)}`);
+  async previstoPago(de: string, ate: string): Promise<PrevistoPagoItemDTO[]> {
+    return unwrap(await actions.previstoPago(de, ate));
   },
 
-  comparar(a: string, b: string): Promise<ComparacaoMesesDTO> {
-    return request<ComparacaoMesesDTO>(
-      `/relatorios/comparar?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`,
-    );
+  async comparar(a: string, b: string): Promise<ComparacaoMesesDTO> {
+    return unwrap(await actions.comparar(a, b));
   },
 
   /** Baixa o consolidado no formato escolhido e dispara o download no navegador. */
   async exportar(formato: FormatoExportacao, de: string, ate: string): Promise<void> {
-    const url = `${API_URL}/relatorios/exportar?formato=${formato}&${intervalo(de, ate)}`;
-    const response = await fetch(url, { cache: 'no-store' });
-    if (!response.ok) {
-      throw new ApiError(response.status, `Erro ${response.status} ao exportar relatório.`);
+    const { base64, contentType } = unwrap(await actions.exportarRelatorio(formato, de, ate));
+
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
     }
 
-    const blob = await response.blob();
+    const blob = new Blob([bytes], { type: contentType });
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = objectUrl;

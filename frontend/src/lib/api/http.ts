@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; message: string };
 
 class ApiError extends Error {
   constructor(
@@ -10,32 +10,12 @@ class ApiError extends Error {
   }
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new ApiError(response.status, await extractErrorMessage(response));
+/** Desempacota o resultado de uma server action, lançando ApiError em caso de falha. */
+export function unwrap<T>(result: ApiResult<T>): T {
+  if (!result.ok) {
+    throw new ApiError(result.status, result.message);
   }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
-}
-
-async function extractErrorMessage(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { message?: string | string[] };
-    if (Array.isArray(body.message)) return body.message.join('; ');
-    if (body.message) return body.message;
-  } catch {
-    // corpo sem JSON; cai no fallback abaixo.
-  }
-  return `Erro ${response.status} ao chamar a API.`;
+  return result.data;
 }
 
 export { ApiError };

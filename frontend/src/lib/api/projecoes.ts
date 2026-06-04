@@ -1,11 +1,9 @@
 import type { ProjecaoParametrosDTO, ProjecaoResultadoDTO } from '@financas-pessoais/shared';
-import { request } from './http';
+import { unwrap } from './http';
+import * as actions from './actions/projecoes';
 
 export const projecoesApi = {
-  calcular(parametros: ProjecaoParametrosDTO): Promise<ProjecaoResultadoDTO> {
-    return request<ProjecaoResultadoDTO>('/projecoes/calcular', {
-      method: 'POST',
-      body: JSON.stringify(parametros),
-    });
+  async calcular(parametros: ProjecaoParametrosDTO): Promise<ProjecaoResultadoDTO> {
+    return unwrap(await actions.calcularProjecao(parametros));
   },
 };

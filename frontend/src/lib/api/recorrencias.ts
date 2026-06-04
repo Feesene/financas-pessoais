@@ -3,7 +3,8 @@ import type {
   RegraRecorrenteDTO,
   TipoLancamento,
 } from '@financas-pessoais/shared';
-import { request } from './http';
+import { unwrap } from './http';
+import * as actions from './actions/recorrencias';
 
 export interface CriarRegraBody {
   tipo: TipoLancamento;
@@ -24,34 +25,23 @@ export interface EditarRegraBody extends CriarRegraBody {
 }
 
 export const recorrenciasApi = {
-  listar(): Promise<RegraRecorrenteDTO[]> {
-    return request<RegraRecorrenteDTO[]>('/recorrencias');
+  async listar(): Promise<RegraRecorrenteDTO[]> {
+    return unwrap(await actions.listarRecorrencias());
   },
 
-  criar(body: CriarRegraBody): Promise<RegraRecorrenteDTO> {
-    return request<RegraRecorrenteDTO>('/recorrencias', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async criar(body: CriarRegraBody): Promise<RegraRecorrenteDTO> {
+    return unwrap(await actions.criarRecorrencia(body));
   },
 
-  editar(id: string, body: EditarRegraBody): Promise<RegraRecorrenteDTO> {
-    return request<RegraRecorrenteDTO>(`/recorrencias/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async editar(id: string, body: EditarRegraBody): Promise<RegraRecorrenteDTO> {
+    return unwrap(await actions.editarRecorrencia(id, body));
   },
 
-  encerrar(id: string): Promise<RegraRecorrenteDTO> {
-    return request<RegraRecorrenteDTO>(`/recorrencias/${encodeURIComponent(id)}/encerrar`, {
-      method: 'POST',
-    });
+  async encerrar(id: string): Promise<RegraRecorrenteDTO> {
+    return unwrap(await actions.encerrarRecorrencia(id));
   },
 
-  materializar(competencia: string): Promise<MaterializarResultadoDTO> {
-    return request<MaterializarResultadoDTO>('/recorrencias/materializar', {
-      method: 'POST',
-      body: JSON.stringify({ competencia }),
-    });
+  async materializar(competencia: string): Promise<MaterializarResultadoDTO> {
+    return unwrap(await actions.materializarRecorrencias(competencia));
   },
 };

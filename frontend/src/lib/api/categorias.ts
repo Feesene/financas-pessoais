@@ -4,7 +4,8 @@ import type {
   MetaMensalDTO,
   TipoLancamento,
 } from '@financas-pessoais/shared';
-import { request } from './http';
+import { unwrap } from './http';
+import * as actions from './actions/categorias';
 
 export interface CriarCategoriaBody {
   nome: string;
@@ -23,47 +24,31 @@ export interface DefinirMetaBody {
 }
 
 export const categoriasApi = {
-  listar(): Promise<CategoriaDTO[]> {
-    return request<CategoriaDTO[]>('/categorias');
+  async listar(): Promise<CategoriaDTO[]> {
+    return unwrap(await actions.listarCategorias());
   },
 
-  criar(body: CriarCategoriaBody): Promise<CategoriaDTO> {
-    return request<CategoriaDTO>('/categorias', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async criar(body: CriarCategoriaBody): Promise<CategoriaDTO> {
+    return unwrap(await actions.criarCategoria(body));
   },
 
-  atualizar(id: string, body: AtualizarCategoriaBody): Promise<CategoriaDTO> {
-    return request<CategoriaDTO>(`/categorias/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizar(id: string, body: AtualizarCategoriaBody): Promise<CategoriaDTO> {
+    return unwrap(await actions.atualizarCategoria(id, body));
   },
 
-  excluir(id: string): Promise<void> {
-    return request<void>(`/categorias/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    });
+  async excluir(id: string): Promise<void> {
+    return unwrap(await actions.excluirCategoria(id));
   },
 
-  definirMeta(id: string, body: DefinirMetaBody): Promise<MetaMensalDTO> {
-    return request<MetaMensalDTO>(`/categorias/${encodeURIComponent(id)}/metas`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async definirMeta(id: string, body: DefinirMetaBody): Promise<MetaMensalDTO> {
+    return unwrap(await actions.definirMeta(id, body));
   },
 
-  removerMeta(id: string, competencia: string): Promise<void> {
-    return request<void>(
-      `/categorias/${encodeURIComponent(id)}/metas?competencia=${encodeURIComponent(competencia)}`,
-      { method: 'DELETE' },
-    );
+  async removerMeta(id: string, competencia: string): Promise<void> {
+    return unwrap(await actions.removerMeta(id, competencia));
   },
 
-  consumo(competencia: string): Promise<ConsumoCategoriaDTO[]> {
-    return request<ConsumoCategoriaDTO[]>(
-      `/categorias/consumo?competencia=${encodeURIComponent(competencia)}`,
-    );
+  async consumo(competencia: string): Promise<ConsumoCategoriaDTO[]> {
+    return unwrap(await actions.consumoCategorias(competencia));
   },
 };

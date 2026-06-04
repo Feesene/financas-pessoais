@@ -4,7 +4,8 @@ import type {
   RegistrarPagamentoDTO,
   ResumoMensalDTO,
 } from '@financas-pessoais/shared';
-import { ApiError, request } from './http';
+import { ApiError, unwrap } from './http';
+import * as actions from './actions/lancamentos';
 
 /** Corpo de criação de lançamento (mesma forma do de edição). */
 export type CriarLancamentoBody = AtualizarLancamentoDTO;
@@ -12,40 +13,27 @@ export type CriarLancamentoBody = AtualizarLancamentoDTO;
 export { ApiError };
 
 export const lancamentosApi = {
-  listar(competencia: string): Promise<LancamentoDTO[]> {
-    return request<LancamentoDTO[]>(`/lancamentos?competencia=${encodeURIComponent(competencia)}`);
+  async listar(competencia: string): Promise<LancamentoDTO[]> {
+    return unwrap(await actions.listarLancamentos(competencia));
   },
 
-  resumo(competencia: string): Promise<ResumoMensalDTO> {
-    return request<ResumoMensalDTO>(
-      `/lancamentos/resumo?competencia=${encodeURIComponent(competencia)}`,
-    );
+  async resumo(competencia: string): Promise<ResumoMensalDTO> {
+    return unwrap(await actions.resumoLancamentos(competencia));
   },
 
-  criar(body: CriarLancamentoBody): Promise<LancamentoDTO> {
-    return request<LancamentoDTO>('/lancamentos', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async criar(body: CriarLancamentoBody): Promise<LancamentoDTO> {
+    return unwrap(await actions.criarLancamento(body));
   },
 
-  atualizar(id: string, body: AtualizarLancamentoDTO): Promise<LancamentoDTO> {
-    return request<LancamentoDTO>(`/lancamentos/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizar(id: string, body: AtualizarLancamentoDTO): Promise<LancamentoDTO> {
+    return unwrap(await actions.atualizarLancamento(id, body));
   },
 
-  registrarPagamento(id: string, body: RegistrarPagamentoDTO): Promise<LancamentoDTO> {
-    return request<LancamentoDTO>(`/lancamentos/${encodeURIComponent(id)}/pagamento`, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    });
+  async registrarPagamento(id: string, body: RegistrarPagamentoDTO): Promise<LancamentoDTO> {
+    return unwrap(await actions.registrarPagamento(id, body));
   },
 
-  excluir(id: string): Promise<void> {
-    return request<void>(`/lancamentos/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    });
+  async excluir(id: string): Promise<void> {
+    return unwrap(await actions.excluirLancamento(id));
   },
 };

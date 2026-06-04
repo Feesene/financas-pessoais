@@ -7,7 +7,8 @@ import type {
   SaldosReservaDTO,
   TipoMovimentoReserva,
 } from '@financas-pessoais/shared';
-import { request } from './http';
+import { unwrap } from './http';
+import * as actions from './actions/reservas';
 
 export interface CriarBaldeBody {
   nome: string;
@@ -29,66 +30,51 @@ export interface MovimentoBody {
 }
 
 export const reservasApi = {
-  listarBaldes(): Promise<BaldeDTO[]> {
-    return request<BaldeDTO[]>('/baldes');
+  async listarBaldes(): Promise<BaldeDTO[]> {
+    return unwrap(await actions.listarBaldes());
   },
 
-  criarBalde(body: CriarBaldeBody): Promise<BaldeDTO> {
-    return request<BaldeDTO>('/baldes', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async criarBalde(body: CriarBaldeBody): Promise<BaldeDTO> {
+    return unwrap(await actions.criarBalde(body));
   },
 
-  atualizarBalde(id: string, body: AtualizarBaldeBody): Promise<BaldeDTO> {
-    return request<BaldeDTO>(`/baldes/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizarBalde(id: string, body: AtualizarBaldeBody): Promise<BaldeDTO> {
+    return unwrap(await actions.atualizarBalde(id, body));
   },
 
-  excluirBalde(id: string): Promise<void> {
-    return request<void>(`/baldes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  async excluirBalde(id: string): Promise<void> {
+    return unwrap(await actions.excluirBalde(id));
   },
 
-  registrarMovimento(baldeId: string, body: MovimentoBody): Promise<MovimentoReservaDTO> {
-    return request<MovimentoReservaDTO>(`/baldes/${encodeURIComponent(baldeId)}/movimentos`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async registrarMovimento(baldeId: string, body: MovimentoBody): Promise<MovimentoReservaDTO> {
+    return unwrap(await actions.registrarMovimentoReserva(baldeId, body));
   },
 
-  atualizarMovimento(id: string, body: MovimentoBody): Promise<MovimentoReservaDTO> {
-    return request<MovimentoReservaDTO>(`/movimentos/${encodeURIComponent(id)}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+  async atualizarMovimento(id: string, body: MovimentoBody): Promise<MovimentoReservaDTO> {
+    return unwrap(await actions.atualizarMovimentoReserva(id, body));
   },
 
-  excluirMovimento(id: string): Promise<void> {
-    return request<void>(`/movimentos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  async excluirMovimento(id: string): Promise<void> {
+    return unwrap(await actions.excluirMovimentoReserva(id));
   },
 
-  saldos(competencia?: string): Promise<SaldosReservaDTO> {
-    const qs = competencia ? `?competencia=${encodeURIComponent(competencia)}` : '';
-    return request<SaldosReservaDTO>(`/reservas/saldos${qs}`);
+  async saldos(competencia?: string): Promise<SaldosReservaDTO> {
+    return unwrap(await actions.saldosReserva(competencia));
   },
 
-  evolucao(baldeId: string): Promise<EvolucaoBaldeDTO[]> {
-    return request<EvolucaoBaldeDTO[]>(`/baldes/${encodeURIComponent(baldeId)}/evolucao`);
+  async evolucao(baldeId: string): Promise<EvolucaoBaldeDTO[]> {
+    return unwrap(await actions.evolucaoBalde(baldeId));
   },
 
-  evolucaoAnual(ano: number): Promise<EvolucaoReservaItemDTO[]> {
-    return request<EvolucaoReservaItemDTO[]>(`/reservas/evolucao-anual?ano=${ano}`);
+  async evolucaoAnual(ano: number): Promise<EvolucaoReservaItemDTO[]> {
+    return unwrap(await actions.evolucaoAnualReserva(ano));
   },
 
-  listarMovimentosBalde(baldeId: string): Promise<MovimentoReservaDTO[]> {
-    return request<MovimentoReservaDTO[]>(`/baldes/${encodeURIComponent(baldeId)}/movimentos`);
+  async listarMovimentosBalde(baldeId: string): Promise<MovimentoReservaDTO[]> {
+    return unwrap(await actions.listarMovimentosBalde(baldeId));
   },
 
-  movimentosDoMes(competencia: string): Promise<MovimentoReservaComBaldeDTO[]> {
-    return request<MovimentoReservaComBaldeDTO[]>(
-      `/reservas/movimentos?competencia=${encodeURIComponent(competencia)}`,
-    );
+  async movimentosDoMes(competencia: string): Promise<MovimentoReservaComBaldeDTO[]> {
+    return unwrap(await actions.movimentosDoMes(competencia));
   },
 };
