@@ -52,6 +52,7 @@ priorização do MVP e o backlog também estão lá.
   - [shared](./docs/modules/shared.md)
 - [Fluxo Spec Driven e priorização](./docs/README.md)
 - [Backlog (fora do MVP)](./docs/BACKLOG.md)
+- [Deploy na nuvem (Vercel + Supabase)](./docs/deploy.md)
 
 ## Escopo do MVP
 

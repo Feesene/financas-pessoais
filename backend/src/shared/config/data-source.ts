@@ -11,10 +11,16 @@ import { MovimentoReservaSchema } from '../../modules/reservas/infrastructure/pe
 /**
  * DataSource usado pela CLI do TypeORM para rodar migrations (fora do contexto Nest).
  * O app em runtime continua usando `buildTypeOrmConfig` (synchronize em dev).
+ *
+ * Migrations usam a conexão DIRETA do Supabase (`DIRECT_URL`, porta 5432), não o pooler,
+ * pois precisam de sessão estável e prepared statements (spec §3.2, EC-8).
  */
+const sslEnabled = process.env.DATABASE_SSL === 'true';
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: process.env.DATABASE_URL,
+  url: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
+  ssl: sslEnabled ? { rejectUnauthorized: false } : false,
   entities: [
     CategoriaSchema,
     MetaMensalSchema,
