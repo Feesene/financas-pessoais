@@ -15,6 +15,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useTheme, type Theme } from '@/components/theme/ThemeProvider';
+import { logoutAction } from '@/lib/auth/actions';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -115,6 +117,15 @@ export function Topbar() {
                 <Repeat className="mr-1.5 h-3.5 w-3.5" />
                 Recorrências
               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <form action={logoutAction}>
+                <button type="submit" className="flex w-full items-center">
+                  <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                  Sair
+                </button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -47,13 +47,16 @@ Posiciona-se como **painel financeiro pessoal completo e privado**, reunindo num
 costumam separar (orçamento vs. investimentos) e o que planilhas fazem de forma frágil. Diferencial: feito sob
 medida para o uso do proprietário, em português/R$, sem limite de categorias e sem mensalidade.
 
-**Fora de escopo no MVP** (backlog): importação de planilha/CSV, Open Finance, cotações automáticas, login e
-multiusuário, app mobile.
+**Fora de escopo no MVP** (backlog): importação de planilha/CSV, Open Finance, cotações automáticas, multiusuário
+(o login é por senha única, single-user), app mobile.
 
 ## Contexto operacional
 
 - **Execução local** na máquina do usuário: frontend Next.js (`:3000`), API NestJS (`:3001`), PostgreSQL via
   Docker (`:5432`).
-- **Sem deploy público no MVP** e **sem autenticação** — premissa explícita. Qualquer exposição na internet
-  exige antes implementar autenticação e isolamento de dados.
+- **Autenticação por senha única (portão de acesso):** o app é protegido por uma senha definida em `APP_PASSWORD`;
+  sem sessão válida, todas as rotas e server actions de dados são bloqueadas e redirecionam para `/login`
+  (ver [feature de login](../.speckit/features/autenticacao-login/spec_autenticacao-login.md)). Isso revoga a
+  premissa original "sem autenticação" e habilita a exposição pública. Como o sistema é single-user, não há
+  multiusuário nem isolamento de dados por dono.
 - Configuração por variáveis de ambiente (`.env`), com exemplos versionados (`.env.example`).

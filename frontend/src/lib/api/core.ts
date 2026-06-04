@@ -1,11 +1,24 @@
 import type { ApiResult } from './http';
+import { getSession } from '../auth/session';
 
 export type { ApiResult } from './http';
 
 const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+/** Resposta padrão quando não há sessão válida — não toca o backend (RF-005, CS-003). */
+const UNAUTHORIZED: ApiResult<never> = {
+  ok: false,
+  status: 401,
+  message: 'Sessão expirada. Faça login novamente.',
+};
+
 /** Executa uma requisição JSON ao backend a partir do servidor (server actions). */
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
+  // Guarda de sessão centralizada: toda action de dados passa por aqui (spec §1, §4.3).
+  if (!(await getSession())) {
+    return UNAUTHORIZED;
+  }
+
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
@@ -31,6 +44,10 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<A
 export async function apiRequestBinary(
   path: string,
 ): Promise<ApiResult<{ base64: string; contentType: string }>> {
+  if (!(await getSession())) {
+    return UNAUTHORIZED;
+  }
+
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, { cache: 'no-store' });
