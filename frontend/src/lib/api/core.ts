@@ -5,6 +5,16 @@ export type { ApiResult } from './http';
 
 const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+// Segredo do "Protection Bypass for Automation" do projeto backend na Vercel.
+// O backend fica com Deployment Protection ligada (privado); só o frontend, que
+// porta este segredo, consegue chamá-lo. Ausente em dev local (backend sem proteção).
+const API_BYPASS_SECRET = process.env.API_BYPASS_SECRET;
+
+/** Header que libera o acesso à API protegida da Vercel, quando o segredo está configurado. */
+function bypassHeaders(): Record<string, string> {
+  return API_BYPASS_SECRET ? { 'x-vercel-protection-bypass': API_BYPASS_SECRET } : {};
+}
+
 /** Resposta padrão quando não há sessão válida — não toca o backend (RF-005, CS-003). */
 const UNAUTHORIZED: ApiResult<never> = {
   ok: false,
@@ -23,7 +33,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<A
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...init,
-      headers: { 'Content-Type': 'application/json', ...init?.headers },
+      headers: { 'Content-Type': 'application/json', ...bypassHeaders(), ...init?.headers },
       cache: 'no-store',
     });
   } catch {
@@ -50,7 +60,7 @@ export async function apiRequestBinary(
 
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, { cache: 'no-store' });
+    response = await fetch(`${API_URL}${path}`, { headers: bypassHeaders(), cache: 'no-store' });
   } catch {
     return { ok: false, status: 0, message: 'Não foi possível conectar à API.' };
   }

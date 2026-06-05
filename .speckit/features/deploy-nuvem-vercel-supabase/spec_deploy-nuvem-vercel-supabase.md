@@ -363,9 +363,15 @@ código). Dependências indicadas inline.
   criar 2 projetos Vercel (Root Directory `frontend` e `backend`), configurar env por projeto, deploy por push e
   rollback ("Promote to Production"). _Depende de: T4, T6._
 
-- [ ] **T8 — [ops] Provisionar Supabase e aplicar migrations.**
+- [x] **T8 — [ops] Provisionar Supabase e aplicar migrations.**
   Criar projeto Supabase; exportar `DIRECT_URL` + `DATABASE_SSL=true`; `npm run migration:run -w backend`; conferir
   as 7 migrations e idempotência (CS-003). _Depende de: T3, T7._
+  **Feito (2026-06-04):** projeto `financas-pessoais` (ref `ckfrxfbfjpjfpeqkiufc`, região `sa-east-1`) criado via
+  conector. As migrations assumem uma tabela base `lancamentos` pré-existente (originalmente criada por `synchronize`
+  no dev) que nenhuma migration cria — então o schema completo (base `lancamentos` + DDL das 7 migrations, backfills
+  são no-op em banco vazio) foi aplicado direto via `apply_migration`. 10 tabelas criadas (0 linhas). **RLS habilitado**
+  em todas as tabelas para bloquear o acesso público anon/PostgREST; o backend conecta como role `postgres` (BYPASSRLS)
+  e não é afetado.
 
 - [ ] **T9 — [ops] Configurar e publicar os 2 projetos Vercel.**
   Projeto frontend (Root `frontend`, env `API_URL`, `APP_PASSWORD`, `AUTH_SECRET`, `AUTH_SESSION_TTL`); projeto

@@ -81,6 +81,21 @@ DIRECT_URL="postgresql://...:5432/postgres" DATABASE_SSL=true npm run migration:
 3. Deploy. Anote `https://<frontend>.vercel.app`.
 4. Volte ao **projeto do backend** e ajuste `CORS_ORIGINS` para essa URL; redeploy do backend.
 
+## 4.1 Proteção de acesso (Deployment Protection)
+
+A Vercel liga **Deployment Protection (Vercel Authentication)** por padrão. Para esta arquitetura:
+
+- **Frontend:** a proteção precisa ficar **desligada** (Settings → Deployment Protection → Vercel Authentication →
+  *Disabled* em Production). O frontend é a superfície pública e já é protegido pelo **gate de senha** (`APP_PASSWORD`).
+- **Backend:** o backend **não tem auth própria** e o CORS não barra acesso direto (curl/Postman ignoram CORS). Por isso
+  ele fica **privado** com a proteção **ligada**, e o frontend o chama com um segredo de bypass:
+  1. Backend → Settings → Deployment Protection → **Protection Bypass for Automation** → *Enable* → copie o segredo.
+  2. Frontend → Environment Variables → adicione `API_BYPASS_SECRET` = esse segredo.
+  3. O frontend envia o header `x-vercel-protection-bypass` automaticamente
+     ([`core.ts`](../frontend/src/lib/api/core.ts)); redeploy o frontend para aplicar a env var.
+
+> Assim, só o frontend (que detém o segredo) alcança a API; uma chamada direta ao backend sem o header recebe 401.
+
 ## 5. Verificação
 
 - Acesse `https://<frontend>.vercel.app`, faça login e confirme leitura/escrita nas 7 áreas.
