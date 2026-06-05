@@ -31,7 +31,7 @@ export function RelatoriosView() {
           <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
           <p className="text-sm text-muted-foreground">Consolidado e análises do período.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <SeletorAno ano={ano} onSelecionar={setAno} />
           <ExportarButton de={de} ate={ate} />
         </div>

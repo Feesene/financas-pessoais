@@ -59,12 +59,12 @@ export function CategoriasView() {
             Organize receitas e despesas e defina metas mensais.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
           <CategoriaFormDialog
             onSalvo={carregar}
             trigger={
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus />
                 Nova categoria
               </Button>
