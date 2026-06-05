@@ -34,3 +34,7 @@ coverage/
 
 # Misc
 *.tsbuildinfo
+
+# Dumps / seeds com dados reais (repo público — nunca versionar dados pessoais)
+seed_supabase.sql
+*.seed.sql

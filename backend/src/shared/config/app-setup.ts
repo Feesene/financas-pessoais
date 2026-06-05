@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { ApiKeyGuard } from '../auth/api-key.guard';
 
 /**
  * Lê `CORS_ORIGINS` (lista separada por vírgula) e devolve as origens permitidas.
@@ -38,5 +39,6 @@ function buildCorsOptions(env: NodeJS.ProcessEnv = process.env): CorsOptions {
  */
 export function configureApp(app: INestApplication): void {
   app.enableCors(buildCorsOptions());
+  app.useGlobalGuards(new ApiKeyGuard());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 }

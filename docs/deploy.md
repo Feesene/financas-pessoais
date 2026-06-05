@@ -61,6 +61,7 @@ DIRECT_URL="postgresql://...:5432/postgres" DATABASE_SSL=true npm run migration:
    | `DATABASE_SSL` | `true` |
    | `DATABASE_POOL_MAX` | `1` |
    | `CORS_ORIGINS` | `https://<frontend>.vercel.app` (preencha após o passo 4) |
+   | `API_KEY` | segredo forte (mesmo valor no frontend) — exige `x-api-key` nas chamadas |
 
    `NODE_ENV=production` é definido automaticamente pela Vercel.
 4. Deploy. Anote a URL pública da API: `https://<backend>.vercel.app`.
@@ -76,25 +77,29 @@ DIRECT_URL="postgresql://...:5432/postgres" DATABASE_SSL=true npm run migration:
    | `APP_PASSWORD` | senha de acesso (segredo) |
    | `AUTH_SECRET` | ≥ 32 bytes aleatórios |
    | `AUTH_SESSION_TTL` | `604800` (opcional) |
+   | `API_KEY` | mesmo segredo definido no backend (enviado no header `x-api-key`) |
 
    > Segredos **nunca** com prefixo `NEXT_PUBLIC_`. Não defina `NEXT_PUBLIC_API_URL` em produção.
 3. Deploy. Anote `https://<frontend>.vercel.app`.
 4. Volte ao **projeto do backend** e ajuste `CORS_ORIGINS` para essa URL; redeploy do backend.
 
-## 4.1 Proteção de acesso (Deployment Protection)
+## 4.1 Proteção de acesso (chave de API)
 
-A Vercel liga **Deployment Protection (Vercel Authentication)** por padrão. Para esta arquitetura:
+A Vercel liga **Deployment Protection (Vercel Authentication)** por padrão, o que bloqueia até a tela de login. Para
+esta arquitetura:
 
-- **Frontend:** a proteção precisa ficar **desligada** (Settings → Deployment Protection → Vercel Authentication →
+- **Frontend:** Deployment Protection **desligada** (Settings → Deployment Protection → Vercel Authentication →
   *Disabled* em Production). O frontend é a superfície pública e já é protegido pelo **gate de senha** (`APP_PASSWORD`).
-- **Backend:** o backend **não tem auth própria** e o CORS não barra acesso direto (curl/Postman ignoram CORS). Por isso
-  ele fica **privado** com a proteção **ligada**, e o frontend o chama com um segredo de bypass:
-  1. Backend → Settings → Deployment Protection → **Protection Bypass for Automation** → *Enable* → copie o segredo.
-  2. Frontend → Environment Variables → adicione `API_BYPASS_SECRET` = esse segredo.
-  3. O frontend envia o header `x-vercel-protection-bypass` automaticamente
-     ([`core.ts`](../frontend/src/lib/api/core.ts)); redeploy o frontend para aplicar a env var.
+- **Backend:** o backend **não tem login próprio** e o CORS não barra acesso direto (curl/Postman ignoram CORS). A
+  proteção é por **chave de API compartilhada**, independente de recursos da Vercel:
+  1. Gere um segredo forte: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+  2. Defina `API_KEY` = esse segredo **nos dois projetos** (backend e frontend), em Production.
+  3. O backend exige o header `x-api-key` ([`ApiKeyGuard`](../backend/src/shared/auth/api-key.guard.ts), registrado em
+     [`app-setup.ts`](../backend/src/shared/config/app-setup.ts)); o frontend o envia
+     ([`core.ts`](../frontend/src/lib/api/core.ts)). Redeploy ambos para aplicar a env var.
 
-> Assim, só o frontend (que detém o segredo) alcança a API; uma chamada direta ao backend sem o header recebe 401.
+> Assim, só o frontend (que detém a chave) alcança a API; uma chamada direta ao backend sem o header recebe **401**.
+> Sem `API_KEY` definida (dev local) o guard libera tudo, preservando o fluxo local.
 
 ## 5. Verificação
 
