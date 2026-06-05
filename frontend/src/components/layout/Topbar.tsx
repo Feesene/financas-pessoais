@@ -62,14 +62,14 @@ export function Topbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="mr-4 flex items-center gap-2 text-sm font-bold tracking-tight text-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-sm font-bold tracking-tight text-foreground hover:text-primary transition-colors md:mr-4"
         >
           <Wallet className="h-5 w-5 text-primary" />
-          <span className="hidden sm:inline">Finanças</span>
+          <span>Finanças</span>
         </Link>
 
-        {/* Nav links */}
-        <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto">
+        {/* Nav links — escondidos no mobile (ver BottomNav) */}
+        <nav className="hidden flex-1 items-center gap-0.5 overflow-x-auto md:flex">
           {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => (
             <Link
               key={href}
@@ -86,6 +86,9 @@ export function Topbar() {
             </Link>
           ))}
         </nav>
+
+        {/* Espaçador no mobile para empurrar as configurações à direita */}
+        <div className="flex-1 md:hidden" />
 
         {/* Settings */}
         <DropdownMenu>

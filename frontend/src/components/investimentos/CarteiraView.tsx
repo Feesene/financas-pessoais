@@ -47,10 +47,10 @@ export function CarteiraView() {
             Acompanhe seus ativos por classe, com subtotais e total geral.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <HistoricoCarteiraDialog
             trigger={
-              <Button variant="outline">
+              <Button variant="outline" className="flex-1 sm:flex-none">
                 <History />
                 Histórico
               </Button>
@@ -59,7 +59,7 @@ export function CarteiraView() {
           <AtivoFormDialog
             onSalvo={carregar}
             trigger={
-              <Button>
+              <Button className="flex-1 sm:flex-none">
                 <Plus />
                 Novo ativo
               </Button>

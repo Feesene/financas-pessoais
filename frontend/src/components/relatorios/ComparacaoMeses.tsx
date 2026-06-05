@@ -160,7 +160,7 @@ function SeletorMes({
 }) {
   return (
     <Select value={valor} onValueChange={onSelecionar}>
-      <SelectTrigger aria-label={rotulo} className="w-[10rem]">
+      <SelectTrigger aria-label={rotulo} className="min-w-0 flex-1 sm:w-[10rem] sm:flex-none">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -45,18 +45,19 @@ export function NavegacaoMeses() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2 sm:w-auto">
       <Button
         variant="outline"
         size="icon"
         aria-label="Mês anterior"
         onClick={irMesAnterior}
+        className="shrink-0"
       >
         <ChevronLeft />
       </Button>
 
       <Select value={String(mes)} onValueChange={(v) => setCompetencia(formatar(ano, Number(v)))}>
-        <SelectTrigger aria-label="Mês" className="w-[8.5rem]">
+        <SelectTrigger aria-label="Mês" className="min-w-0 flex-1 sm:w-[8.5rem] sm:flex-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -69,7 +70,7 @@ export function NavegacaoMeses() {
       </Select>
 
       <Select value={String(ano)} onValueChange={(v) => setCompetencia(formatar(Number(v), mes))}>
-        <SelectTrigger aria-label="Ano" className="w-[5.5rem]">
+        <SelectTrigger aria-label="Ano" className="w-[4.75rem] shrink-0 sm:w-[5.5rem]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -86,6 +87,7 @@ export function NavegacaoMeses() {
         size="icon"
         aria-label="Mês seguinte"
         onClick={irMesSeguinte}
+        className="shrink-0"
       >
         <ChevronRight />
       </Button>

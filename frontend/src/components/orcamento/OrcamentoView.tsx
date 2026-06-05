@@ -88,13 +88,13 @@ export function OrcamentoView() {
             {competenciaLabel(competencia)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
           <LancamentoFormDialog
             competencia={competencia}
             onSalvo={carregar}
             trigger={
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus />
                 Novo lançamento
               </Button>

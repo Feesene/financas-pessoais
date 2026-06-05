@@ -57,7 +57,7 @@ export function AtivoCard({ ativo, competencia, onAlterado }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3">
+    <div className="flex flex-col gap-2 rounded-lg border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div className="min-w-0">
         <p className="truncate font-medium">{ativo.descricao}</p>
         <p className="text-xs text-muted-foreground">
@@ -68,7 +68,7 @@ export function AtivoCard({ ativo, competencia, onAlterado }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 sm:justify-end">
         <span className="text-lg font-semibold tabular-nums">{formatarReais(ativo.valorBruto)}</span>
         <div className="flex items-center">
           <CotacaoFormDialog
