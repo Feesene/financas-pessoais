@@ -52,12 +52,12 @@ export function ReservasView() {
             Organize sua reserva em baldes e acompanhe o saldo de cada objetivo.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
           <BaldeFormDialog
             onSalvo={carregar}
             trigger={
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus />
                 Novo balde
               </Button>

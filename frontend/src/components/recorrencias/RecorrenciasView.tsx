@@ -54,7 +54,7 @@ export function RecorrenciasView() {
           categorias={categorias}
           onSalvo={carregar}
           trigger={
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus />
               Nova recorrência
             </Button>
