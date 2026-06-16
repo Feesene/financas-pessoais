@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { CompetenciaProvider } from '@/components/competencia/CompetenciaProvider';
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Toaster />
           </CompetenciaProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
