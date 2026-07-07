@@ -31,18 +31,10 @@ import type {
   EvolucaoMensalItemDTO,
   EvolucaoReservaItemDTO,
   GastoPorCategoriaItemDTO,
-  PosicaoCarteiraDTO,
   PrevistoPagoItemDTO,
-  ResumoMensalDTO,
-  SaldosReservaDTO,
 } from '@financas-pessoais/shared';
-import { lancamentosApi } from '@/lib/api/lancamentos';
-import { categoriasApi } from '@/lib/api/categorias';
-import { relatoriosApi } from '@/lib/api/relatorios';
-import { reservasApi } from '@/lib/api/reservas';
-import { investimentosApi } from '@/lib/api/investimentos';
-import { recorrenciasApi } from '@/lib/api/recorrencias';
-import { competenciaLabel, isCompetenciaValida, mesAnterior } from '@/lib/competencia';
+import { dashboardApi, type DashboardData } from '@/lib/api/dashboard';
+import { competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -55,31 +47,16 @@ import { LancamentoFormDialog } from '@/components/orcamento/LancamentoFormDialo
 
 type Status = 'loading' | 'ready' | 'error';
 
-interface DashboardData {
-  resumo: ResumoMensalDTO;
-  consumo: ConsumoCategoriaDTO[];
-  evolucao: EvolucaoMensalItemDTO[];
-  porCategoria: GastoPorCategoriaItemDTO[];
-  reservas: SaldosReservaDTO;
-  carteira: PosicaoCarteiraDTO;
-  evolucaoReservas: EvolucaoReservaItemDTO[];
-  previstoPago: PrevistoPagoItemDTO[];
-}
-
 const CORES_FALLBACK = [
-  '#3b82f6', '#22c55e', '#f97316', '#a855f7',
-  '#ef4444', '#14b8a6', '#eab308', '#ec4899',
+  '#3b82f6',
+  '#22c55e',
+  '#f97316',
+  '#a855f7',
+  '#ef4444',
+  '#14b8a6',
+  '#eab308',
+  '#ec4899',
 ];
-
-function subtrairMeses(competencia: string, n: number): string {
-  let c = competencia;
-  for (let i = 0; i < n; i++) c = mesAnterior(c);
-  return c;
-}
-
-function competenciasDoAno(ano: number): string[] {
-  return Array.from({ length: 12 }, (_, i) => `${ano}-${String(i + 1).padStart(2, '0')}`);
-}
 
 export function DashboardView() {
   const { competencia, setCompetencia } = useCompetencia();
@@ -99,51 +76,28 @@ export function DashboardView() {
   const [dados, setDados] = useState<DashboardData | null>(null);
   const [status, setStatus] = useState<Status>('loading');
 
-  const carregar = useCallback(async () => {
-    setStatus('loading');
-    try {
-      const ano = Number(competencia.slice(0, 4));
-      await Promise.allSettled(
-        competenciasDoAno(ano).map((c) => recorrenciasApi.materializar(c)),
-      );
+  // `comEsqueleto` controla se a tela troca para o estado de carregamento
+  // (carga inicial/troca de competência) ou atualiza em silêncio, preservando
+  // a rolagem — usado após salvar um lançamento.
+  const recarregar = useCallback(
+    async (comEsqueleto: boolean) => {
+      if (comEsqueleto) setStatus('loading');
+      try {
+        setDados(await dashboardApi.carregar(competencia));
+        setStatus('ready');
+      } catch {
+        if (comEsqueleto) setStatus('error');
+      }
+    },
+    [competencia],
+  );
 
-      const inicio6m = subtrairMeses(competencia, 5);
-      const [
-        resumo,
-        consumo,
-        evolucao,
-        porCategoria,
-        reservas,
-        carteira,
-        evolucaoReservas,
-        previstoPago,
-      ] = await Promise.all([
-        lancamentosApi.resumo(competencia),
-        categoriasApi.consumo(competencia),
-        relatoriosApi.evolucao(inicio6m, competencia),
-        relatoriosApi.porCategoria(competencia, competencia),
-        reservasApi.saldos(),
-        investimentosApi.posicao(),
-        reservasApi.evolucaoAnual(ano),
-        relatoriosApi.previstoPago(`${ano}-01`, `${ano}-12`),
-      ]);
-      setDados({
-        resumo,
-        consumo,
-        evolucao,
-        porCategoria,
-        reservas,
-        carteira,
-        evolucaoReservas,
-        previstoPago,
-      });
-      setStatus('ready');
-    } catch {
-      setStatus('error');
-    }
-  }, [competencia]);
+  const carregar = useCallback(() => recarregar(true), [recarregar]);
+  const recarregarSilencioso = useCallback(() => recarregar(false), [recarregar]);
 
-  useEffect(() => { void carregar(); }, [carregar]);
+  useEffect(() => {
+    void carregar();
+  }, [carregar]);
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6">
@@ -151,16 +105,14 @@ export function DashboardView() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            {competenciaLabel(competencia)}
-          </p>
+          <p className="text-sm text-muted-foreground">{competenciaLabel(competencia)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
           {dados && (
             <LancamentoFormDialog
               competencia={competencia}
-              onSalvo={carregar}
+              onSalvo={recarregarSilencioso}
               trigger={
                 <Button className="w-full sm:w-auto">
                   <Plus />
@@ -182,7 +134,9 @@ export function DashboardView() {
             <p className="text-sm text-muted-foreground">
               Verifique se o servidor da API está em execução.
             </p>
-            <Button variant="outline" onClick={carregar}>Tentar novamente</Button>
+            <Button variant="outline" onClick={carregar}>
+              Tentar novamente
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -258,7 +212,9 @@ export function DashboardView() {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Reservas por mês — {competencia.slice(0, 4)}</CardTitle>
+                <CardTitle className="text-base">
+                  Reservas por mês — {competencia.slice(0, 4)}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <GraficoReservas dados={dados.evolucaoReservas} />
@@ -267,7 +223,9 @@ export function DashboardView() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Previsto vs pago — {competencia.slice(0, 4)}</CardTitle>
+                <CardTitle className="text-base">
+                  Previsto vs pago — {competencia.slice(0, 4)}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <GraficoPrevistoPago dados={dados.previstoPago} />
@@ -307,12 +265,16 @@ function KpiCard({ rotulo, valor, icone: Icone, cor, fundo, detalhe }: KpiProps)
   return (
     <Card>
       <CardContent className="flex items-center gap-4 p-5">
-        <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', fundo)}>
+        <span
+          className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', fundo)}
+        >
           <Icone className={cn('h-5 w-5', cor)} />
         </span>
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{rotulo}</p>
-          <p className={cn('text-xl font-bold tabular-nums truncate', cor)}>{formatarReais(valor)}</p>
+          <p className={cn('text-xl font-bold tabular-nums truncate', cor)}>
+            {formatarReais(valor)}
+          </p>
           {detalhe && <p className="text-xs text-muted-foreground truncate">{detalhe}</p>}
         </div>
       </CardContent>
@@ -393,7 +355,9 @@ function GraficoCategoria({ dados }: { dados: GastoPorCategoriaItemDTO[] }) {
             <span className="flex items-center gap-1.5 truncate">
               <span
                 className="h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: item.categoria.cor ?? CORES_FALLBACK[i % CORES_FALLBACK.length] }}
+                style={{
+                  backgroundColor: item.categoria.cor ?? CORES_FALLBACK[i % CORES_FALLBACK.length],
+                }}
               />
               <span className="truncate">{item.categoria.nome}</span>
             </span>
@@ -441,7 +405,8 @@ function GraficoReservas({ dados }: { dados: EvolucaoReservaItemDTO[] }) {
 
 function GraficoPrevistoPago({ dados }: { dados: PrevistoPagoItemDTO[] }) {
   const temDados = dados.some(
-    (p) => p.receitasPrevisto > 0 || p.despesasPrevisto > 0 || p.receitasPago > 0 || p.despesasPago > 0,
+    (p) =>
+      p.receitasPrevisto > 0 || p.despesasPrevisto > 0 || p.receitasPago > 0 || p.despesasPago > 0,
   );
   if (!temDados) {
     return (
@@ -493,7 +458,11 @@ function ConsumoGrid({ consumo }: { consumo: ConsumoCategoriaDTO[] }) {
                   style={{ backgroundColor: item.categoria.cor ?? 'transparent' }}
                 />
                 <span className="truncate font-medium">{item.categoria.nome}</span>
-                {item.estourou && <Badge variant="destructive" className="text-xs">!</Badge>}
+                {item.estourou && (
+                  <Badge variant="destructive" className="text-xs">
+                    !
+                  </Badge>
+                )}
               </span>
               <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                 {formatarReais(item.gasto)} / {formatarReais(meta)}
@@ -501,7 +470,10 @@ function ConsumoGrid({ consumo }: { consumo: ConsumoCategoriaDTO[] }) {
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
               <div
-                className={cn('h-full rounded-full', item.estourou ? 'bg-destructive' : 'bg-success')}
+                className={cn(
+                  'h-full rounded-full',
+                  item.estourou ? 'bg-destructive' : 'bg-success',
+                )}
                 style={{ width: `${largura}%` }}
               />
             </div>
@@ -537,7 +509,9 @@ function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-[5.25rem]" />)}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-[5.25rem]" />
+        ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <Skeleton className="h-64 lg:col-span-2" />

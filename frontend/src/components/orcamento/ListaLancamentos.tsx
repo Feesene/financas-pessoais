@@ -52,9 +52,14 @@ export function ListaLancamentos({ lancamentos, onAlterado }: Props) {
 
             {[...porCategoria.entries()].map(([categoria, itens]) => (
               <div key={categoria} className="space-y-2">
-                <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {categoria}
-                </h3>
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {categoria}
+                  </h3>
+                  <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                    {formatarReais(subtotal(itens))}
+                  </span>
+                </div>
                 <div className="space-y-2">
                   {itens.map((lancamento) => (
                     <LancamentoItem

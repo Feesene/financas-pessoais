@@ -60,7 +60,7 @@ export class RecorrenciasController {
   async materializarCompetencia(
     @Body() body: MaterializarRequest,
   ): Promise<MaterializarResultadoDTO> {
-    return this.materializar.execute(body.competencia);
+    return this.materializar.execute(body.competencia, body.ate);
   }
 
   @Put(':id')

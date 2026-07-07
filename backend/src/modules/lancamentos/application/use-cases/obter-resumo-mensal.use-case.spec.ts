@@ -73,6 +73,23 @@ describe('ObterResumoMensalUseCase', () => {
     expect(resumo.totalDespesas).toBe(237);
   });
 
+  it('ignora ocorrências de recorrência ainda não pagas', async () => {
+    // Manual sempre conta; recorrência não paga fica de fora.
+    await repo.save(lancamento({ tipo: 'DESPESA', valor: 100 }));
+    await repo.save(
+      lancamento({
+        tipo: 'DESPESA',
+        valor: 300,
+        origemRegraId: 'regra-1',
+        ocorrenciaIndice: 1,
+      }),
+    );
+
+    const resumo = await useCase.execute('2026-05');
+
+    expect(resumo.totalDespesas).toBe(100);
+  });
+
   it('considera apenas lançamentos da competência solicitada', async () => {
     await repo.save(lancamento({ tipo: 'RECEITA', valor: 100, competencia: '2026-05' }));
     await repo.save(lancamento({ tipo: 'RECEITA', valor: 999, competencia: '2026-06' }));

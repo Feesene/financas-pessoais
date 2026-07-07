@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, History, Plus, TrendingUp } from 'lucide-react';
-import type { AtivoDTO, PosicaoCarteiraDTO, SubtotalTipoDTO, TipoAtivo } from '@financas-pessoais/shared';
+import type {
+  AtivoDTO,
+  PosicaoCarteiraDTO,
+  SubtotalTipoDTO,
+  TipoAtivo,
+} from '@financas-pessoais/shared';
 import { investimentosApi } from '@/lib/api/investimentos';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { formatarReais } from '@/lib/format';
@@ -23,16 +28,22 @@ export function CarteiraView() {
   const [posicao, setPosicao] = useState<PosicaoCarteiraDTO | null>(null);
   const [status, setStatus] = useState<Status>('loading');
 
-  const carregar = useCallback(async () => {
-    setStatus('loading');
+  // `comEsqueleto` controla se a tela troca para o estado de carregamento
+  // (carga inicial/tentar novamente) ou atualiza em silêncio, preservando a
+  // rolagem — usado após salvar ativo, movimento ou cotação.
+  const recarregar = useCallback(async (comEsqueleto: boolean) => {
+    if (comEsqueleto) setStatus('loading');
     try {
       const dados = await investimentosApi.posicao();
       setPosicao(dados);
       setStatus('ready');
     } catch {
-      setStatus('error');
+      if (comEsqueleto) setStatus('error');
     }
   }, []);
+
+  const carregar = useCallback(() => recarregar(true), [recarregar]);
+  const recarregarSilencioso = useCallback(() => recarregar(false), [recarregar]);
 
   useEffect(() => {
     void carregar();
@@ -57,7 +68,7 @@ export function CarteiraView() {
             }
           />
           <AtivoFormDialog
-            onSalvo={carregar}
+            onSalvo={recarregarSilencioso}
             trigger={
               <Button className="flex-1 sm:flex-none">
                 <Plus />
@@ -96,7 +107,7 @@ export function CarteiraView() {
                 Adicione ações, fundos imobiliários ou fundos para montar sua carteira.
               </p>
               <AtivoFormDialog
-                onSalvo={carregar}
+                onSalvo={recarregarSilencioso}
                 trigger={
                   <Button>
                     <Plus />
@@ -132,7 +143,7 @@ export function CarteiraView() {
                   ativos={posicao.ativos.filter((a) => a.tipo === tipo)}
                   subtotal={posicao.subtotais.find((s) => s.tipo === tipo) ?? null}
                   competencia={competencia}
-                  onAlterado={carregar}
+                  onAlterado={recarregarSilencioso}
                 />
               ),
             )}

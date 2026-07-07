@@ -35,9 +35,10 @@ export async function encerrarRecorrencia(id: string): Promise<ApiResult<RegraRe
 
 export async function materializarRecorrencias(
   competencia: string,
+  ate?: string,
 ): Promise<ApiResult<MaterializarResultadoDTO>> {
   return apiRequest<MaterializarResultadoDTO>('/recorrencias/materializar', {
     method: 'POST',
-    body: JSON.stringify({ competencia }),
+    body: JSON.stringify(ate ? { competencia, ate } : { competencia }),
   });
 }

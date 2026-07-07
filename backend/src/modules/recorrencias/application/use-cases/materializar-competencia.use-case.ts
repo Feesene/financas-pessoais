@@ -35,7 +35,24 @@ export class MaterializarCompetenciaUseCase {
     @Inject(CATEGORIA_REPOSITORY) private readonly categorias: CategoriaRepository,
   ) {}
 
-  async execute(competencia: string): Promise<MaterializarResultadoDTO> {
+  /**
+   * Materializa `competencia` ou, com `ate`, todo o intervalo [competencia, ate]
+   * em uma única chamada. `criados` acumula o total do intervalo.
+   */
+  async execute(competencia: string, ate?: string): Promise<MaterializarResultadoDTO> {
+    if (!ate || ate <= competencia) {
+      return this.materializarMes(competencia);
+    }
+
+    let criados = 0;
+    for (let mes = competencia; mes <= ate; mes = proximaCompetencia(mes)) {
+      const resultado = await this.materializarMes(mes);
+      criados += resultado.criados;
+    }
+    return { competencia, criados };
+  }
+
+  private async materializarMes(competencia: string): Promise<MaterializarResultadoDTO> {
     const [regras, existentes] = await Promise.all([
       this.regras.findAtivasNaCompetencia(competencia),
       this.lancamentos.findByCompetencia(competencia),
@@ -94,4 +111,10 @@ export class MaterializarCompetenciaUseCase {
     }
     return regra.descricao ? `${regra.descricao} (${label})` : `Parcela ${label}`;
   }
+}
+
+/** Competência (AAAA-MM) imediatamente seguinte. */
+function proximaCompetencia(competencia: string): string {
+  const [ano, mes] = competencia.split('-').map(Number);
+  return mes === 12 ? `${ano + 1}-01` : `${ano}-${String(mes + 1).padStart(2, '0')}`;
 }

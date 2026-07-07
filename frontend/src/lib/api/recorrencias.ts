@@ -41,7 +41,7 @@ export const recorrenciasApi = {
     return unwrap(await actions.encerrarRecorrencia(id));
   },
 
-  async materializar(competencia: string): Promise<MaterializarResultadoDTO> {
-    return unwrap(await actions.materializarRecorrencias(competencia));
+  async materializar(competencia: string, ate?: string): Promise<MaterializarResultadoDTO> {
+    return unwrap(await actions.materializarRecorrencias(competencia, ate));
   },
 };

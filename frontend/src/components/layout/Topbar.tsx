@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useTheme, type Theme } from '@/components/theme/ThemeProvider';
 import { logoutAction } from '@/lib/auth/actions';
+import { CalculadoraDialog } from './CalculadoraDialog';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -89,6 +90,9 @@ export function Topbar() {
 
         {/* Espaçador no mobile para empurrar as configurações à direita */}
         <div className="flex-1 md:hidden" />
+
+        {/* Calculadora */}
+        <CalculadoraDialog />
 
         {/* Settings */}
         <DropdownMenu>

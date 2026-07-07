@@ -84,15 +84,13 @@ export function OrcamentoView() {
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Orçamento Mensal</h1>
-          <p className="text-sm text-muted-foreground">
-            {competenciaLabel(competencia)}
-          </p>
+          <p className="text-sm text-muted-foreground">{competenciaLabel(competencia)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
           <LancamentoFormDialog
             competencia={competencia}
-            onSalvo={carregar}
+            onSalvo={recarregarSilencioso}
             trigger={
               <Button className="w-full sm:w-auto">
                 <Plus />
