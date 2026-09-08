@@ -19,10 +19,16 @@ import { EditarMovimentoCarteiraUseCase } from '../src/modules/investimentos/app
 import { ExcluirMovimentoCarteiraUseCase } from '../src/modules/investimentos/application/use-cases/excluir-movimento-carteira.use-case';
 import { ObterPosicaoCarteiraUseCase } from '../src/modules/investimentos/application/use-cases/obter-posicao-carteira.use-case';
 import { ObterHistoricoCarteiraUseCase } from '../src/modules/investimentos/application/use-cases/obter-historico-carteira.use-case';
+import { RegistrarCotacaoUseCase } from '../src/modules/investimentos/application/use-cases/registrar-cotacao.use-case';
+import { ListarCotacoesUseCase } from '../src/modules/investimentos/application/use-cases/listar-cotacoes.use-case';
+import { ObterEvolucaoAtivoUseCase } from '../src/modules/investimentos/application/use-cases/obter-evolucao-ativo.use-case';
+import { ExcluirCotacaoUseCase } from '../src/modules/investimentos/application/use-cases/excluir-cotacao.use-case';
 import { ATIVO_REPOSITORY } from '../src/modules/investimentos/domain/repositories/ativo.repository';
 import { MOVIMENTO_CARTEIRA_REPOSITORY } from '../src/modules/investimentos/domain/repositories/movimento-carteira.repository';
+import { COTACAO_ATIVO_REPOSITORY } from '../src/modules/investimentos/domain/repositories/cotacao-ativo.repository';
 import { InMemoryAtivoRepository } from './in-memory-ativo.repository';
 import { InMemoryMovimentoCarteiraRepository } from './in-memory-movimento-carteira.repository';
+import { InMemoryCotacaoAtivoRepository } from './in-memory-cotacao-ativo.repository';
 
 describe('Investimentos (e2e)', () => {
   let app: INestApplication;
@@ -40,8 +46,13 @@ describe('Investimentos (e2e)', () => {
         ExcluirMovimentoCarteiraUseCase,
         ObterPosicaoCarteiraUseCase,
         ObterHistoricoCarteiraUseCase,
+        RegistrarCotacaoUseCase,
+        ListarCotacoesUseCase,
+        ObterEvolucaoAtivoUseCase,
+        ExcluirCotacaoUseCase,
         { provide: ATIVO_REPOSITORY, useClass: InMemoryAtivoRepository },
         { provide: MOVIMENTO_CARTEIRA_REPOSITORY, useClass: InMemoryMovimentoCarteiraRepository },
+        { provide: COTACAO_ATIVO_REPOSITORY, useClass: InMemoryCotacaoAtivoRepository },
       ],
     }).compile();
 
@@ -208,8 +219,13 @@ describe('Investimentos (e2e)', () => {
         ExcluirMovimentoCarteiraUseCase,
         ObterPosicaoCarteiraUseCase,
         ObterHistoricoCarteiraUseCase,
+        RegistrarCotacaoUseCase,
+        ListarCotacoesUseCase,
+        ObterEvolucaoAtivoUseCase,
+        ExcluirCotacaoUseCase,
         { provide: ATIVO_REPOSITORY, useClass: InMemoryAtivoRepository },
         { provide: MOVIMENTO_CARTEIRA_REPOSITORY, useClass: InMemoryMovimentoCarteiraRepository },
+        { provide: COTACAO_ATIVO_REPOSITORY, useClass: InMemoryCotacaoAtivoRepository },
       ],
     }).compile();
     const isolada = moduleRef.createNestApplication();
