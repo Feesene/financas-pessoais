@@ -15,6 +15,11 @@ const MESES = [
   'Dezembro',
 ];
 
+/** Monta AAAA-MM a partir de ano e mês (1-12). */
+export function formatarCompetencia(ano: number, mes: number): string {
+  return `${ano}-${String(mes).padStart(2, '0')}`;
+}
+
 export function isCompetenciaValida(competencia: string): boolean {
   return COMPETENCIA_REGEX.test(competencia);
 }
@@ -22,7 +27,7 @@ export function isCompetenciaValida(competencia: string): boolean {
 /** Competência do mês corrente no formato AAAA-MM. */
 export function competenciaAtual(): string {
   const agora = new Date();
-  return formatar(agora.getFullYear(), agora.getMonth() + 1);
+  return formatarCompetencia(agora.getFullYear(), agora.getMonth() + 1);
 }
 
 /** Decompõe AAAA-MM em ano e mês (1-12). */
@@ -33,20 +38,16 @@ export function parseCompetencia(competencia: string): { ano: number; mes: numbe
 
 export function mesAnterior(competencia: string): string {
   const { ano, mes } = parseCompetencia(competencia);
-  return mes === 1 ? formatar(ano - 1, 12) : formatar(ano, mes - 1);
+  return mes === 1 ? formatarCompetencia(ano - 1, 12) : formatarCompetencia(ano, mes - 1);
 }
 
 export function mesSeguinte(competencia: string): string {
   const { ano, mes } = parseCompetencia(competencia);
-  return mes === 12 ? formatar(ano + 1, 1) : formatar(ano, mes + 1);
+  return mes === 12 ? formatarCompetencia(ano + 1, 1) : formatarCompetencia(ano, mes + 1);
 }
 
 /** Rótulo legível, ex.: "2026-05" -> "Maio de 2026". */
 export function competenciaLabel(competencia: string): string {
   const { ano, mes } = parseCompetencia(competencia);
   return `${MESES[mes - 1]} de ${ano}`;
-}
-
-function formatar(ano: number, mes: number): string {
-  return `${ano}-${String(mes).padStart(2, '0')}`;
 }

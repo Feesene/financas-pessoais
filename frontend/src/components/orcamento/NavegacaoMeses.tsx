@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { competenciaAtual, parseCompetencia } from '@/lib/competencia';
+import { competenciaAtual, formatarCompetencia, parseCompetencia } from '@/lib/competencia';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,12 +27,9 @@ const MESES = [
   'Dezembro',
 ];
 
-function formatar(ano: number, mes: number): string {
-  return `${ano}-${String(mes).padStart(2, '0')}`;
-}
-
 export function NavegacaoMeses() {
-  const { competencia, setCompetencia, irMesAnterior, irMesSeguinte } = useCompetencia();
+  const { competencia, setCompetencia, irMesAnterior, irMesSeguinte, irParaHoje, noMesAtual } =
+    useCompetencia();
   const { ano, mes } = parseCompetencia(competencia);
   const anoBase = parseCompetencia(competenciaAtual()).ano;
   const anos: number[] = [];
@@ -56,7 +53,10 @@ export function NavegacaoMeses() {
         <ChevronLeft />
       </Button>
 
-      <Select value={String(mes)} onValueChange={(v) => setCompetencia(formatar(ano, Number(v)))}>
+      <Select
+        value={String(mes)}
+        onValueChange={(v) => setCompetencia(formatarCompetencia(ano, Number(v)))}
+      >
         <SelectTrigger aria-label="Mês" className="min-w-0 flex-1 sm:w-[8.5rem] sm:flex-none">
           <SelectValue />
         </SelectTrigger>
@@ -69,7 +69,10 @@ export function NavegacaoMeses() {
         </SelectContent>
       </Select>
 
-      <Select value={String(ano)} onValueChange={(v) => setCompetencia(formatar(Number(v), mes))}>
+      <Select
+        value={String(ano)}
+        onValueChange={(v) => setCompetencia(formatarCompetencia(Number(v), mes))}
+      >
         <SelectTrigger aria-label="Ano" className="w-[4.75rem] shrink-0 sm:w-[5.5rem]">
           <SelectValue />
         </SelectTrigger>
@@ -91,6 +94,13 @@ export function NavegacaoMeses() {
       >
         <ChevronRight />
       </Button>
+
+      {/* Volta ao mês corrente sem contar cliques no ‹ ›. Some quando já se está nele. */}
+      {!noMesAtual && (
+        <Button variant="ghost" size="sm" onClick={irParaHoje} className="shrink-0">
+          Hoje
+        </Button>
+      )}
     </div>
   );
 }
