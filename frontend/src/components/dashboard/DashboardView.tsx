@@ -172,6 +172,7 @@ export function DashboardView() {
               icone={PiggyBank}
               cor="text-primary"
               fundo="bg-primary/10"
+              detalhe={`até ${competenciaLabel(competencia)}`}
             />
             <KpiCard
               rotulo="Carteira"
