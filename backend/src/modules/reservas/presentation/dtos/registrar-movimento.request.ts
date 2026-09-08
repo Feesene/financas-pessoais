@@ -1,4 +1,13 @@
-import { IsIn, IsNumber, IsOptional, IsString, Matches, MaxLength, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import type { TipoMovimentoReserva } from '@financas-pessoais/shared';
 
 export class RegistrarMovimentoRequest {
@@ -16,4 +25,12 @@ export class RegistrarMovimentoRequest {
   @IsString()
   @MaxLength(255)
   descricao?: string;
+
+  /**
+   * Confirma uma retirada que deixaria o balde negativo. Sem ela a API devolve
+   * 409 com o mês e o saldo resultante, para o cliente perguntar antes.
+   */
+  @IsOptional()
+  @IsBoolean()
+  permitirNegativo?: boolean;
 }

@@ -27,6 +27,11 @@ export interface MovimentoBody {
   valor: number;
   competencia: string;
   descricao?: string | null;
+  /**
+   * Confirma uma retirada que deixaria o balde negativo. Sem ela a API responde
+   * 409 com o mês e o saldo resultante, e a tela pergunta antes de insistir.
+   */
+  permitirNegativo?: boolean;
 }
 
 export const reservasApi = {

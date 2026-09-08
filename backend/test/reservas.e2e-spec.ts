@@ -75,10 +75,11 @@ describe('Reservas (e2e)', () => {
     tipo: 'APORTE' | 'RETIRADA',
     valor: number,
     competencia: string,
+    permitirNegativo = false,
   ): Promise<MovimentoReservaDTO> {
     const res = await request(server())
       .post(`/baldes/${baldeId}/movimentos`)
-      .send({ tipo, valor, competencia })
+      .send({ tipo, valor, competencia, permitirNegativo })
       .expect(201);
     return res.body as MovimentoReservaDTO;
   }
@@ -143,9 +144,18 @@ describe('Reservas (e2e)', () => {
     expect(itemMar?.saldo).toBe(200);
   });
 
-  it('sinaliza saldo negativo sem bloquear a retirada', async () => {
+  it('recusa retirada acima do saldo (409) e a aceita com permitirNegativo', async () => {
     const balde = await criarBalde('Fundo', 0);
-    await movimentar(balde.id, 'RETIRADA', 80, '2026-01');
+
+    // Sem confirmação, a retirada para com 409 e a mensagem diz o mês e o rombo.
+    const recusa = await request(server())
+      .post(`/baldes/${balde.id}/movimentos`)
+      .send({ tipo: 'RETIRADA', valor: 80, competencia: '2026-01' })
+      .expect(409);
+    expect((recusa.body as { message: string }).message).toContain('R$ -80,00 em 2026-01');
+
+    // Saldo negativo segue sendo um estado válido — só deixou de ser silencioso.
+    await movimentar(balde.id, 'RETIRADA', 80, '2026-01', true);
 
     const res = await request(server()).get('/reservas/saldos').expect(200);
     const item = (res.body as SaldosReservaDTO).baldes.find((b) => b.balde.id === balde.id);
