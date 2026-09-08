@@ -4,6 +4,7 @@ import type {
   AtualizarLancamentoDTO,
   HistoricoRecorrenciaDTO,
   LancamentoDTO,
+  ModoValor,
   RegistrarPagamentoDTO,
   ResumoMensalDTO,
 } from '@financas-pessoais/shared';
@@ -14,9 +15,12 @@ export async function listarLancamentos(competencia: string): Promise<ApiResult<
   return apiRequest<LancamentoDTO[]>(`/lancamentos?competencia=${encodeURIComponent(competencia)}`);
 }
 
-export async function resumoLancamentos(competencia: string): Promise<ApiResult<ResumoMensalDTO>> {
+export async function resumoLancamentos(
+  competencia: string,
+  modo: ModoValor = 'PREVISTO',
+): Promise<ApiResult<ResumoMensalDTO>> {
   return apiRequest<ResumoMensalDTO>(
-    `/lancamentos/resumo?competencia=${encodeURIComponent(competencia)}`,
+    `/lancamentos/resumo?competencia=${encodeURIComponent(competencia)}&modo=${modo}`,
   );
 }
 

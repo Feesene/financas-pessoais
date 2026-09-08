@@ -5,6 +5,7 @@ import type {
   EvolucaoMensalItemDTO,
   EvolucaoReservaItemDTO,
   GastoPorCategoriaItemDTO,
+  ModoValor,
   PosicaoCarteiraDTO,
   PrevistoPagoItemDTO,
   ResumoMensalDTO,
@@ -20,7 +21,10 @@ import type { DashboardData } from '../dashboard';
  * materialização do ano e as oito consultas aqui troca ~20 idas ao servidor
  * por uma só — no servidor as consultas rodam em paralelo contra a API.
  */
-export async function carregarDashboard(competencia: string): Promise<ApiResult<DashboardData>> {
+export async function carregarDashboard(
+  competencia: string,
+  modo: ModoValor = 'PREVISTO',
+): Promise<ApiResult<DashboardData>> {
   const ano = competencia.slice(0, 4);
 
   // Materializa o ano inteiro em uma chamada (alimenta resumo, consumo e
@@ -48,10 +52,14 @@ export async function carregarDashboard(competencia: string): Promise<ApiResult<
     evolucaoReservas,
     previstoPago,
   ] = await Promise.all([
-    apiRequest<ResumoMensalDTO>(`/lancamentos/resumo?competencia=${comp}`),
-    apiRequest<ConsumoCategoriaDTO[]>(`/categorias/consumo?competencia=${comp}`),
-    apiRequest<EvolucaoMensalItemDTO[]>(`/relatorios/evolucao?de=${inicio6m}&ate=${comp}`),
-    apiRequest<GastoPorCategoriaItemDTO[]>(`/relatorios/por-categoria?de=${comp}&ate=${comp}`),
+    apiRequest<ResumoMensalDTO>(`/lancamentos/resumo?competencia=${comp}&modo=${modo}`),
+    apiRequest<ConsumoCategoriaDTO[]>(`/categorias/consumo?competencia=${comp}&modo=${modo}`),
+    apiRequest<EvolucaoMensalItemDTO[]>(
+      `/relatorios/evolucao?de=${inicio6m}&ate=${comp}&modo=${modo}`,
+    ),
+    apiRequest<GastoPorCategoriaItemDTO[]>(
+      `/relatorios/por-categoria?de=${comp}&ate=${comp}&modo=${modo}`,
+    ),
     apiRequest<SaldosReservaDTO>(`/reservas/saldos?competencia=${comp}`),
     apiRequest<PosicaoCarteiraDTO>('/carteira/posicao'),
     apiRequest<EvolucaoReservaItemDTO[]>(`/reservas/evolucao-anual?ano=${ano}`),

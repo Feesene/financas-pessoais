@@ -3,6 +3,7 @@ import type {
   EvolucaoMensalItemDTO,
   EvolucaoReservaItemDTO,
   GastoPorCategoriaItemDTO,
+  ModoValor,
   PosicaoCarteiraDTO,
   PrevistoPagoItemDTO,
   ResumoMensalDTO,
@@ -24,7 +25,7 @@ export interface DashboardData {
 }
 
 export const dashboardApi = {
-  async carregar(competencia: string): Promise<DashboardData> {
-    return unwrap(await actions.carregarDashboard(competencia));
+  async carregar(competencia: string, modo: ModoValor = 'PREVISTO'): Promise<DashboardData> {
+    return unwrap(await actions.carregarDashboard(competencia, modo));
   },
 };

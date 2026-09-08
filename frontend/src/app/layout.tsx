@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { CompetenciaProvider } from '@/components/competencia/CompetenciaProvider';
+import { ModoValorProvider } from '@/components/modo/ModoValorProvider';
 import { Topbar } from '@/components/layout/Topbar';
 import { BottomNav } from '@/components/layout/BottomNav';
 import './globals.css';
@@ -35,12 +36,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen antialiased">
         <ThemeProvider>
           <CompetenciaProvider>
-            <Topbar />
-            <div className="flex min-h-[calc(100vh-3.5rem)] flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-              {children}
-            </div>
-            <BottomNav />
-            <Toaster />
+            <ModoValorProvider>
+              <Topbar />
+              <div className="flex min-h-[calc(100vh-3.5rem)] flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+                {children}
+              </div>
+              <BottomNav />
+              <Toaster />
+            </ModoValorProvider>
           </CompetenciaProvider>
         </ThemeProvider>
         <Analytics />

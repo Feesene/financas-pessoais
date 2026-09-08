@@ -2,6 +2,7 @@ import type {
   CategoriaDTO,
   ConsumoCategoriaDTO,
   MetaMensalDTO,
+  ModoValor,
   TipoLancamento,
 } from '@financas-pessoais/shared';
 import { unwrap } from './http';
@@ -48,7 +49,7 @@ export const categoriasApi = {
     return unwrap(await actions.removerMeta(id, competencia));
   },
 
-  async consumo(competencia: string): Promise<ConsumoCategoriaDTO[]> {
-    return unwrap(await actions.consumoCategorias(competencia));
+  async consumo(competencia: string, modo: ModoValor = 'PREVISTO'): Promise<ConsumoCategoriaDTO[]> {
+    return unwrap(await actions.consumoCategorias(competencia, modo));
   },
 };

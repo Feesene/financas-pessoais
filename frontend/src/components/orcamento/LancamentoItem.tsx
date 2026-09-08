@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { History, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { valorEfetivo, type LancamentoDTO } from '@financas-pessoais/shared';
+import {
+  contaNoModo,
+  valorEfetivo,
+  type LancamentoDTO,
+  type ModoValor,
+} from '@financas-pessoais/shared';
 import { ApiError, lancamentosApi } from '@/lib/api/lancamentos';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -25,10 +30,11 @@ import { HistoricoRecorrenciaDialog } from './HistoricoRecorrenciaDialog';
 
 interface Props {
   lancamento: LancamentoDTO;
+  modo: ModoValor;
   onAlterado: () => void;
 }
 
-export function LancamentoItem({ lancamento, onAlterado }: Props) {
+export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
   const [excluindo, setExcluindo] = useState(false);
   const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
@@ -36,7 +42,11 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
   const deRegra = lancamento.origemRegraId !== null;
   const pago = lancamento.pago;
   const valorReal = valorEfetivo(lancamento);
-  const mostraReal = pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
+  // No modo Realizado a ocorrência ainda não paga continua na lista, mas fora do
+  // subtotal — o esmaecido explica por que os números não fecham com a leitura.
+  const foraDoTotal = !contaNoModo(lancamento, modo);
+  const mostraReal =
+    pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
 
   function aoAlternarPago(marcando: boolean) {
     if (marcando) {
@@ -77,7 +87,13 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40">
+    <div
+      className={cn(
+        'flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40',
+        foraDoTotal && 'opacity-55',
+      )}
+      title={foraDoTotal ? 'Ainda não paga — fora do total realizado' : undefined}
+    >
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 font-medium">
           {deRegra && (

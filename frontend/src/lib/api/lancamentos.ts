@@ -2,6 +2,7 @@ import type {
   AtualizarLancamentoDTO,
   HistoricoRecorrenciaDTO,
   LancamentoDTO,
+  ModoValor,
   RegistrarPagamentoDTO,
   ResumoMensalDTO,
 } from '@financas-pessoais/shared';
@@ -18,8 +19,8 @@ export const lancamentosApi = {
     return unwrap(await actions.listarLancamentos(competencia));
   },
 
-  async resumo(competencia: string): Promise<ResumoMensalDTO> {
-    return unwrap(await actions.resumoLancamentos(competencia));
+  async resumo(competencia: string, modo: ModoValor = 'PREVISTO'): Promise<ResumoMensalDTO> {
+    return unwrap(await actions.resumoLancamentos(competencia, modo));
   },
 
   /** Ocorrências já materializadas de uma regra recorrente, da mais recente para a mais antiga. */

@@ -67,7 +67,7 @@ export class CategoriasController {
 
   @Get('consumo')
   async consumo(@Query() query: CompetenciaQueryRequest): Promise<ConsumoCategoriaDTO[]> {
-    return this.obterConsumo.execute(query.competencia);
+    return this.obterConsumo.execute(query.competencia, query.modo ?? 'PREVISTO');
   }
 
   @Put(':id')

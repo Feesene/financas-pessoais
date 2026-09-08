@@ -68,7 +68,7 @@ export class LancamentosController {
 
   @Get('resumo')
   async resumo(@Query() query: CompetenciaQueryRequest): Promise<ResumoMensalDTO> {
-    return this.obterResumoMensal.execute(query.competencia);
+    return this.obterResumoMensal.execute(query.competencia, query.modo ?? 'PREVISTO');
   }
 
   @Get('historico-recorrencia')
