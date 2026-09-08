@@ -1,4 +1,4 @@
-import type { TipoLancamento } from '@financas-pessoais/shared';
+import { valorEfetivo, type TipoLancamento } from '@financas-pessoais/shared';
 import { LancamentoInvalidoError } from '../errors/lancamento-invalido.error';
 import { PagamentoLancamentoManualError } from '../errors/pagamento-lancamento-manual.error';
 
@@ -106,9 +106,12 @@ export class Lancamento {
     return this.props.valorPago ?? null;
   }
 
-  /** Valor que rege as agregações: o pago quando marcado, senão o previsto. */
+  /**
+   * Valor que rege as agregações: o pago quando marcado, senão o previsto.
+   * Delega à definição única do pacote `shared`, compartilhada com o frontend.
+   */
   get valorEfetivo(): number {
-    return this.pago && this.valorPago !== null ? this.valorPago : this.props.valor;
+    return valorEfetivo({ valor: this.props.valor, pago: this.pago, valorPago: this.valorPago });
   }
 
   /** Valor com sinal: positivo para receita, negativo para despesa. */

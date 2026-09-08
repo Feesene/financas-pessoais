@@ -15,15 +15,12 @@ export class ObterResumoMensalUseCase {
     const lancamentos = await this.lancamentos.findByCompetencia(competencia);
 
     // Soma em centavos (inteiros) para não acumular erro de ponto flutuante.
-    // Os totais consideram apenas o que já foi efetivado: lançamentos manuais
-    // (sem origem em recorrência) sempre contam; ocorrências de recorrência só
-    // entram quando marcadas como pagas.
+    // Todo lançamento da competência conta, pago ou não — `valorEfetivo` é a
+    // definição única de valor agregável do sistema (ver shared/lancamento.ts),
+    // a mesma usada por metas, relatórios e subtotais da lista.
     let receitasEmCentavos = 0;
     let despesasEmCentavos = 0;
     for (const lancamento of lancamentos) {
-      const efetivado = lancamento.origemRegraId === null || lancamento.pago;
-      if (!efetivado) continue;
-
       const centavos = Math.round(lancamento.valorEfetivo * 100);
       if (lancamento.tipo === 'RECEITA') {
         receitasEmCentavos += centavos;

@@ -1,4 +1,8 @@
-import type { LancamentoDTO, TipoLancamento } from '@financas-pessoais/shared';
+import {
+  somarValorEfetivo,
+  type LancamentoDTO,
+  type TipoLancamento,
+} from '@financas-pessoais/shared';
 import { formatarReais } from '@/lib/format';
 import { LancamentoItem } from './LancamentoItem';
 
@@ -24,8 +28,13 @@ function agruparPorCategoria(lancamentos: LancamentoDTO[]): Map<string, Lancamen
   return grupos;
 }
 
+/**
+ * Mesma definição usada pelos cards de totais e pelos relatórios: o valor pago
+ * quando a ocorrência foi marcada como paga, senão o previsto. Somar `valor`
+ * aqui fazia o subtotal divergir do card "Despesas" da mesma tela.
+ */
 function subtotal(itens: LancamentoDTO[]): number {
-  return itens.reduce((soma, l) => soma + l.valor, 0);
+  return somarValorEfetivo(itens);
 }
 
 export function ListaLancamentos({ lancamentos, onAlterado }: Props) {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { History, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { LancamentoDTO } from '@financas-pessoais/shared';
+import { valorEfetivo, type LancamentoDTO } from '@financas-pessoais/shared';
 import { ApiError, lancamentosApi } from '@/lib/api/lancamentos';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,7 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
   const receita = lancamento.tipo === 'RECEITA';
   const deRegra = lancamento.origemRegraId !== null;
   const pago = lancamento.pago;
-  const valorReal = pago && lancamento.valorPago !== null ? lancamento.valorPago : lancamento.valor;
+  const valorReal = valorEfetivo(lancamento);
   const mostraReal = pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
 
   function aoAlternarPago(marcando: boolean) {
