@@ -3,9 +3,9 @@
   "version": "1.0.2",
   "private": true,
   "workspaces": [
-    "frontend",
+    "shared",
     "backend",
-    "shared"
+    "frontend"
   ],
   "scripts": {
     "build": "npm run build:workspaces && node scripts/package-portable.js",

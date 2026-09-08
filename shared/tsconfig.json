@@ -1,6 +1,11 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    // O backend NestJS é CommonJS e faz `require('@financas-pessoais/shared')` em
+    // runtime (não só `import type`), então o pacote precisa emitir CJS — a base do
+    // monorepo pede ESNext, que o Node não consegue `require` num .js sem "type":"module".
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "outDir": "./dist",
     "rootDir": "./src"
   },

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "npm --prefix ../shared run build",
     "dev": "nest start --watch",
+    "prebuild": "npm --prefix ../shared run build",
     "build": "nest build",
     "start": "node dist/main",
     "start:prod": "node dist/main",
