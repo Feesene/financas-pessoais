@@ -2,6 +2,7 @@
 
 import type {
   AtualizarLancamentoDTO,
+  HistoricoRecorrenciaDTO,
   LancamentoDTO,
   RegistrarPagamentoDTO,
   ResumoMensalDTO,
@@ -16,6 +17,14 @@ export async function listarLancamentos(competencia: string): Promise<ApiResult<
 export async function resumoLancamentos(competencia: string): Promise<ApiResult<ResumoMensalDTO>> {
   return apiRequest<ResumoMensalDTO>(
     `/lancamentos/resumo?competencia=${encodeURIComponent(competencia)}`,
+  );
+}
+
+export async function historicoRecorrencia(
+  regraId: string,
+): Promise<ApiResult<HistoricoRecorrenciaDTO>> {
+  return apiRequest<HistoricoRecorrenciaDTO>(
+    `/lancamentos/historico-recorrencia?regraId=${encodeURIComponent(regraId)}`,
   );
 }
 

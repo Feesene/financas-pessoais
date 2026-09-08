@@ -8,6 +8,7 @@ import { EditarLancamentoUseCase } from './application/use-cases/editar-lancamen
 import { ExcluirLancamentoUseCase } from './application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from './application/use-cases/obter-resumo-mensal.use-case';
 import { RegistrarPagamentoUseCase } from './application/use-cases/registrar-pagamento.use-case';
+import { ObterHistoricoRecorrenciaUseCase } from './application/use-cases/obter-historico-recorrencia.use-case';
 import { LancamentoSchema } from './infrastructure/persistence/entities/lancamento.schema';
 import { OcorrenciaExcluidaSchema } from './infrastructure/persistence/entities/ocorrencia-excluida.schema';
 import { TypeOrmLancamentoRepository } from './infrastructure/persistence/repositories/typeorm-lancamento.repository';
@@ -29,6 +30,7 @@ import { TypeOrmCategoriaRepository } from '../categorias/infrastructure/persist
     ExcluirLancamentoUseCase,
     ObterResumoMensalUseCase,
     RegistrarPagamentoUseCase,
+    ObterHistoricoRecorrenciaUseCase,
     { provide: LANCAMENTO_REPOSITORY, useClass: TypeOrmLancamentoRepository },
     { provide: OCORRENCIA_EXCLUIDA_REPOSITORY, useClass: TypeOrmOcorrenciaExcluidaRepository },
     { provide: CATEGORIA_REPOSITORY, useClass: TypeOrmCategoriaRepository },

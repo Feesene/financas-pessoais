@@ -1,5 +1,6 @@
 import type {
   AtualizarLancamentoDTO,
+  HistoricoRecorrenciaDTO,
   LancamentoDTO,
   RegistrarPagamentoDTO,
   ResumoMensalDTO,
@@ -19,6 +20,11 @@ export const lancamentosApi = {
 
   async resumo(competencia: string): Promise<ResumoMensalDTO> {
     return unwrap(await actions.resumoLancamentos(competencia));
+  },
+
+  /** Ocorrências já materializadas de uma regra recorrente, da mais recente para a mais antiga. */
+  async historicoRecorrencia(regraId: string): Promise<HistoricoRecorrenciaDTO> {
+    return unwrap(await actions.historicoRecorrencia(regraId));
   },
 
   async criar(body: CriarLancamentoBody): Promise<LancamentoDTO> {

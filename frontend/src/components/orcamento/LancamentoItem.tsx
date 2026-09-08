@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Repeat, Trash2 } from 'lucide-react';
+import { History, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { LancamentoDTO } from '@financas-pessoais/shared';
 import { ApiError, lancamentosApi } from '@/lib/api/lancamentos';
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LancamentoFormDialog } from './LancamentoFormDialog';
 import { PagamentoDialog } from './PagamentoDialog';
+import { HistoricoRecorrenciaDialog } from './HistoricoRecorrenciaDialog';
 
 interface Props {
   lancamento: LancamentoDTO;
@@ -125,6 +126,22 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
       </div>
 
       <div className="flex shrink-0 gap-1">
+        {deRegra && (
+          <HistoricoRecorrenciaDialog
+            lancamento={lancamento}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Histórico da recorrência"
+                title="Histórico da recorrência"
+              >
+                <History />
+              </Button>
+            }
+          />
+        )}
+
         <LancamentoFormDialog
           competencia={lancamento.competencia}
           lancamento={lancamento}

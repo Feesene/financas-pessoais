@@ -22,6 +22,14 @@ export class TypeOrmLancamentoRepository implements LancamentoRepository {
     return rows.map(LancamentoMapper.toDomain);
   }
 
+  async findByOrigemRegraId(origemRegraId: string): Promise<Lancamento[]> {
+    const rows = await this.repo.find({
+      where: { origemRegraId },
+      order: { competencia: 'ASC' },
+    });
+    return rows.map(LancamentoMapper.toDomain);
+  }
+
   async findById(id: string): Promise<Lancamento | null> {
     const row = await this.repo.findOne({ where: { id } });
     return row ? LancamentoMapper.toDomain(row) : null;

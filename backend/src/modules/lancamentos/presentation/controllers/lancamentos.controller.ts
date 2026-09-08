@@ -12,13 +12,18 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import type { LancamentoDTO, ResumoMensalDTO } from '@financas-pessoais/shared';
+import type {
+  HistoricoRecorrenciaDTO,
+  LancamentoDTO,
+  ResumoMensalDTO,
+} from '@financas-pessoais/shared';
 import { CriarLancamentoUseCase } from '../../application/use-cases/criar-lancamento.use-case';
 import { ListarLancamentosUseCase } from '../../application/use-cases/listar-lancamentos.use-case';
 import { EditarLancamentoUseCase } from '../../application/use-cases/editar-lancamento.use-case';
 import { ExcluirLancamentoUseCase } from '../../application/use-cases/excluir-lancamento.use-case';
 import { ObterResumoMensalUseCase } from '../../application/use-cases/obter-resumo-mensal.use-case';
 import { RegistrarPagamentoUseCase } from '../../application/use-cases/registrar-pagamento.use-case';
+import { ObterHistoricoRecorrenciaUseCase } from '../../application/use-cases/obter-historico-recorrencia.use-case';
 import { LancamentoNaoEncontradoError } from '../../application/errors/lancamento-nao-encontrado.error';
 import { CategoriaInexistenteError } from '../../application/errors/categoria-inexistente.error';
 import { LancamentoInvalidoError } from '../../domain/errors/lancamento-invalido.error';
@@ -26,6 +31,7 @@ import { CriarLancamentoRequest } from '../dtos/criar-lancamento.request';
 import { AtualizarLancamentoRequest } from '../dtos/atualizar-lancamento.request';
 import { RegistrarPagamentoRequest } from '../dtos/registrar-pagamento.request';
 import { CompetenciaQueryRequest } from '../dtos/competencia-query.request';
+import { HistoricoRecorrenciaQueryRequest } from '../dtos/historico-recorrencia-query.request';
 
 @Controller('lancamentos')
 export class LancamentosController {
@@ -36,6 +42,7 @@ export class LancamentosController {
     private readonly excluirLancamento: ExcluirLancamentoUseCase,
     private readonly obterResumoMensal: ObterResumoMensalUseCase,
     private readonly registrarPagamento: RegistrarPagamentoUseCase,
+    private readonly obterHistoricoRecorrencia: ObterHistoricoRecorrenciaUseCase,
   ) {}
 
   @Post()
@@ -62,6 +69,13 @@ export class LancamentosController {
   @Get('resumo')
   async resumo(@Query() query: CompetenciaQueryRequest): Promise<ResumoMensalDTO> {
     return this.obterResumoMensal.execute(query.competencia);
+  }
+
+  @Get('historico-recorrencia')
+  async historicoRecorrencia(
+    @Query() query: HistoricoRecorrenciaQueryRequest,
+  ): Promise<HistoricoRecorrenciaDTO> {
+    return this.obterHistoricoRecorrencia.execute(query.regraId);
   }
 
   @Put(':id')

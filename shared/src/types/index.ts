@@ -37,6 +37,19 @@ export interface RegistrarPagamentoDTO {
   valorPago?: number | null;
 }
 
+/** Histórico de ocorrências materializadas de uma regra recorrente. */
+export interface HistoricoRecorrenciaDTO {
+  regraId: string;
+  /** Ocorrências já materializadas, da mais recente para a mais antiga. */
+  ocorrencias: LancamentoDTO[];
+  /** Soma dos valores previstos de todas as ocorrências. */
+  totalPrevisto: number;
+  /** Soma dos valores efetivamente pagos (ignora ocorrências em aberto). */
+  totalPago: number;
+  /** Quantidade de ocorrências já marcadas como pagas. */
+  quantidadePagas: number;
+}
+
 /** Frequência de uma regra recorrente. No MVP só mensal. */
 export type Frequencia = 'MENSAL';
 
