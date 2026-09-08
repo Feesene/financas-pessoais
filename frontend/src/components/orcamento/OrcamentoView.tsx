@@ -13,6 +13,8 @@ import { categoriasApi } from '@/lib/api/categorias';
 import { recorrenciasApi } from '@/lib/api/recorrencias';
 import { competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
+import { useModoValor } from '@/components/modo/ModoValorProvider';
+import { SeletorModo } from '@/components/modo/SeletorModo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,6 +28,7 @@ type Status = 'loading' | 'ready' | 'error';
 
 export function OrcamentoView() {
   const { competencia, setCompetencia } = useCompetencia();
+  const { modo } = useModoValor();
   const searchParams = useSearchParams();
 
   // Deep-link: na 1ª carga, ?competencia= válido alimenta o estado global (URL vence).
@@ -58,8 +61,8 @@ export function OrcamentoView() {
         }
         const [lista, resumoMensal, consumoCategorias] = await Promise.all([
           lancamentosApi.listar(competencia),
-          lancamentosApi.resumo(competencia),
-          categoriasApi.consumo(competencia),
+          lancamentosApi.resumo(competencia, modo),
+          categoriasApi.consumo(competencia, modo),
         ]);
         setLancamentos(lista);
         setResumo(resumoMensal);
@@ -69,7 +72,7 @@ export function OrcamentoView() {
         if (comEsqueleto) setStatus('error');
       }
     },
-    [competencia],
+    [competencia, modo],
   );
 
   const carregar = useCallback(() => recarregar(true), [recarregar]);
@@ -84,10 +87,13 @@ export function OrcamentoView() {
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Orçamento Mensal</h1>
-          <p className="text-sm text-muted-foreground">{competenciaLabel(competencia)}</p>
+          <p className="text-sm text-muted-foreground">
+            {competenciaLabel(competencia)} · {modo === 'PREVISTO' ? 'previsto' : 'realizado'}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
+          <SeletorModo />
           <LancamentoFormDialog
             competencia={competencia}
             onSalvo={recarregarSilencioso}
@@ -145,7 +151,11 @@ export function OrcamentoView() {
               </CardContent>
             </Card>
           ) : (
-            <ListaLancamentos lancamentos={lancamentos} onAlterado={recarregarSilencioso} />
+            <ListaLancamentos
+              lancamentos={lancamentos}
+              modo={modo}
+              onAlterado={recarregarSilencioso}
+            />
           )}
         </div>
       )}

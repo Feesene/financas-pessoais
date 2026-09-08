@@ -26,6 +26,7 @@ import { ObterEvolucaoBaldeUseCase } from '../../application/use-cases/obter-evo
 import { BaldeNaoEncontradoError } from '../../application/errors/balde-nao-encontrado.error';
 import { BaldeDuplicadoError } from '../../application/errors/balde-duplicado.error';
 import { BaldeComMovimentosError } from '../../application/errors/balde-com-movimentos.error';
+import { SaldoInsuficienteError } from '../../application/errors/saldo-insuficiente.error';
 import { BaldeInvalidoError } from '../../domain/errors/balde-invalido.error';
 import { MovimentoInvalidoError } from '../../domain/errors/movimento-invalido.error';
 import { CriarBaldeRequest } from '../dtos/criar-balde.request';
@@ -101,6 +102,7 @@ export class BaldesController {
         valor: body.valor,
         competencia: body.competencia,
         descricao: body.descricao ?? null,
+        permitirNegativo: body.permitirNegativo ?? false,
       });
     } catch (error) {
       throw mapErroReservas(error);
@@ -131,7 +133,11 @@ export function mapErroReservas(error: unknown): unknown {
   if (error instanceof BaldeNaoEncontradoError) {
     return new NotFoundException(error.message);
   }
-  if (error instanceof BaldeDuplicadoError || error instanceof BaldeComMovimentosError) {
+  if (
+    error instanceof BaldeDuplicadoError ||
+    error instanceof BaldeComMovimentosError ||
+    error instanceof SaldoInsuficienteError
+  ) {
     return new ConflictException(error.message);
   }
   if (error instanceof BaldeInvalidoError || error instanceof MovimentoInvalidoError) {

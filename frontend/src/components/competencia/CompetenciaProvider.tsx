@@ -1,20 +1,53 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import {
-  competenciaAtual,
-  isCompetenciaValida,
-  mesAnterior,
-  mesSeguinte,
-} from '@/lib/competencia';
+import { competenciaAtual, isCompetenciaValida, mesAnterior, mesSeguinte } from '@/lib/competencia';
 
 const STORAGE_KEY = 'competencia';
+
+/**
+ * Validade da competência guardada. A memória serve para atravessar um F5 ou a
+ * troca de aba dentro da mesma sessão de trabalho; passado esse tempo, abrir o
+ * app em julho e cair em março (onde se navegou da última vez) é sempre erro.
+ */
+const VALIDADE_MS = 12 * 60 * 60 * 1000;
+
+interface CompetenciaSalva {
+  competencia: string;
+  salvoEm: number;
+}
 
 interface CompetenciaContextValue {
   competencia: string;
   setCompetencia: (c: string) => void;
   irMesAnterior: () => void;
   irMesSeguinte: () => void;
+  /** Volta para o mês corrente. */
+  irParaHoje: () => void;
+  /** true quando a competência selecionada é o mês corrente. */
+  noMesAtual: boolean;
+}
+
+/** Lê a competência guardada, descartando formato inválido ou registro vencido. */
+function lerSalva(): string | null {
+  try {
+    const bruto = localStorage.getItem(STORAGE_KEY);
+    if (!bruto) return null;
+    // Formato antigo (só a competência, sem timestamp) é descartado: sem saber
+    // quando foi salvo, o mês corrente é o palpite mais seguro.
+    if (!bruto.startsWith('{')) return null;
+    const salva = JSON.parse(bruto) as Partial<CompetenciaSalva>;
+    if (typeof salva.competencia !== 'string' || !isCompetenciaValida(salva.competencia)) {
+      return null;
+    }
+    if (typeof salva.salvoEm !== 'number' || Date.now() - salva.salvoEm > VALIDADE_MS) {
+      return null;
+    }
+    return salva.competencia;
+  } catch {
+    // localStorage indisponível ou JSON corrompido → mantém o estado em memória.
+    return null;
+  }
 }
 
 const CompetenciaContext = createContext<CompetenciaContextValue | null>(null);
@@ -25,21 +58,16 @@ export function CompetenciaProvider({ children }: { children: React.ReactNode })
   const [competencia, setCompetenciaState] = useState<string>(competenciaAtual);
 
   useEffect(() => {
-    try {
-      const salvo = localStorage.getItem(STORAGE_KEY);
-      if (salvo && isCompetenciaValida(salvo)) {
-        setCompetenciaState(salvo);
-      }
-    } catch {
-      // localStorage indisponível (modo privado restrito) → mantém o estado em memória.
-    }
+    const salva = lerSalva();
+    if (salva) setCompetenciaState(salva);
   }, []);
 
   const setCompetencia = useCallback((c: string) => {
     if (!isCompetenciaValida(c)) return;
     setCompetenciaState(c);
     try {
-      localStorage.setItem(STORAGE_KEY, c);
+      const salva: CompetenciaSalva = { competencia: c, salvoEm: Date.now() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(salva));
     } catch {
       // Persistência falha silenciosamente; app segue funcionando só em memória.
     }
@@ -53,9 +81,20 @@ export function CompetenciaProvider({ children }: { children: React.ReactNode })
     setCompetencia(mesSeguinte(competencia));
   }, [competencia, setCompetencia]);
 
+  const irParaHoje = useCallback(() => {
+    setCompetencia(competenciaAtual());
+  }, [setCompetencia]);
+
   return (
     <CompetenciaContext.Provider
-      value={{ competencia, setCompetencia, irMesAnterior, irMesSeguinte }}
+      value={{
+        competencia,
+        setCompetencia,
+        irMesAnterior,
+        irMesSeguinte,
+        irParaHoje,
+        noMesAtual: competencia === competenciaAtual(),
+      }}
     >
       {children}
     </CompetenciaContext.Provider>

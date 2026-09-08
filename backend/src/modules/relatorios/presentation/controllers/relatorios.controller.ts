@@ -47,12 +47,16 @@ export class RelatoriosController {
   async porCategoria(
     @Query() query: IntervaloQueryRequest,
   ): Promise<GastoPorCategoriaItemDTO[]> {
-    return executar(() => this.obterGastoPorCategoria.execute(query.de, query.ate));
+    return executar(() =>
+      this.obterGastoPorCategoria.execute(query.de, query.ate, query.modo ?? 'PREVISTO'),
+    );
   }
 
   @Get('evolucao')
   async evolucao(@Query() query: IntervaloQueryRequest): Promise<EvolucaoMensalItemDTO[]> {
-    return executar(() => this.obterEvolucao.execute(query.de, query.ate));
+    return executar(() =>
+      this.obterEvolucao.execute(query.de, query.ate, query.modo ?? 'PREVISTO'),
+    );
   }
 
   @Get('previsto-pago')

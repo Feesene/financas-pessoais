@@ -8,6 +8,8 @@ import {
   type MovimentoReservaRepository,
 } from '../../domain/repositories/movimento-reserva.repository';
 import { BaldeNaoEncontradoError } from '../errors/balde-nao-encontrado.error';
+import { SaldoInsuficienteError } from '../errors/saldo-insuficiente.error';
+import { competenciaComSaldoNegativo } from '../saldo-balde';
 
 export interface RegistrarMovimentoInput {
   baldeId: string;
@@ -15,6 +17,8 @@ export interface RegistrarMovimentoInput {
   valor: number;
   competencia: string;
   descricao?: string | null;
+  /** Confirmação explícita de que a retirada pode deixar o balde negativo. */
+  permitirNegativo?: boolean;
 }
 
 @Injectable()
@@ -39,6 +43,19 @@ export class RegistrarMovimentoUseCase {
       competencia: input.competencia,
       descricao: input.descricao ?? null,
     });
+
+    if (movimento.tipo === 'RETIRADA' && input.permitirNegativo !== true) {
+      // Retirar mais do que o balde tem quase sempre é erro de digitação, mas o
+      // saldo negativo continua sendo um estado válido (o DTO tem `negativo` e a
+      // tela o sinaliza). Então a regra avisa em vez de proibir: sem a
+      // confirmação explícita a operação para, com ela passa. Aporte nunca é
+      // barrado — só a retirada precisa caber no saldo.
+      const existentes = await this.movimentos.findByBaldeId(input.baldeId);
+      const negativa = competenciaComSaldoNegativo(balde.saldoInicial, [...existentes, movimento]);
+      if (negativa) {
+        throw new SaldoInsuficienteError(negativa.competencia, negativa.saldoEmCentavos);
+      }
+    }
 
     await this.movimentos.save(movimento);
     return movimentoToDTO(movimento);

@@ -1,6 +1,11 @@
 'use server';
 
-import type { CategoriaDTO, ConsumoCategoriaDTO, MetaMensalDTO } from '@financas-pessoais/shared';
+import type {
+  CategoriaDTO,
+  ConsumoCategoriaDTO,
+  MetaMensalDTO,
+  ModoValor,
+} from '@financas-pessoais/shared';
 import { apiRequest, type ApiResult } from '../core';
 import type { AtualizarCategoriaBody, CriarCategoriaBody, DefinirMetaBody } from '../categorias';
 
@@ -48,8 +53,9 @@ export async function removerMeta(id: string, competencia: string): Promise<ApiR
 
 export async function consumoCategorias(
   competencia: string,
+  modo: ModoValor = 'PREVISTO',
 ): Promise<ApiResult<ConsumoCategoriaDTO[]>> {
   return apiRequest<ConsumoCategoriaDTO[]>(
-    `/categorias/consumo?competencia=${encodeURIComponent(competencia)}`,
+    `/categorias/consumo?competencia=${encodeURIComponent(competencia)}&modo=${modo}`,
   );
 }

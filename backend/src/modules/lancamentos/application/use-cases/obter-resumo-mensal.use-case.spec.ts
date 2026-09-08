@@ -73,8 +73,9 @@ describe('ObterResumoMensalUseCase', () => {
     expect(resumo.totalDespesas).toBe(237);
   });
 
-  it('ignora ocorrências de recorrência ainda não pagas', async () => {
-    // Manual sempre conta; recorrência não paga fica de fora.
+  it('conta ocorrências de recorrência ainda não pagas pelo valor previsto', async () => {
+    // "Previsto manda": o mês é o compromisso assumido, então a ocorrência em
+    // aberto entra igual às demais — mesma regra usada por metas e relatórios.
     await repo.save(lancamento({ tipo: 'DESPESA', valor: 100 }));
     await repo.save(
       lancamento({
@@ -87,7 +88,61 @@ describe('ObterResumoMensalUseCase', () => {
 
     const resumo = await useCase.execute('2026-05');
 
-    expect(resumo.totalDespesas).toBe(100);
+    expect(resumo.totalDespesas).toBe(400);
+  });
+
+  it('mistura manual, ocorrência em aberto e ocorrência paga na mesma regra', async () => {
+    // Cenário de regressão do INC-01: antes, este mês produzia três totais
+    // diferentes conforme a tela. Agora só existe um — 2000 + 800 + 150.
+    await repo.save(
+      lancamento({ tipo: 'DESPESA', valor: 2000, origemRegraId: 'aluguel', ocorrenciaIndice: 1 }),
+    );
+    await repo.save(lancamento({ tipo: 'DESPESA', valor: 800 }));
+    await repo.save(
+      lancamento({
+        tipo: 'DESPESA',
+        valor: 180,
+        origemRegraId: 'luz',
+        ocorrenciaIndice: 1,
+      }).registrarPagamento(true, 150),
+    );
+
+    const resumo = await useCase.execute('2026-05');
+
+    expect(resumo.totalDespesas).toBe(2950);
+  });
+
+  it('no modo REALIZADO deixa de fora a ocorrência de recorrência não paga', async () => {
+    // Mesmo mês do teste anterior, lido pela outra ponta: 800 (manual, fato
+    // consumado) + 150 (luz paga). O aluguel em aberto ainda não moveu dinheiro.
+    await repo.save(
+      lancamento({ tipo: 'DESPESA', valor: 2000, origemRegraId: 'aluguel', ocorrenciaIndice: 1 }),
+    );
+    await repo.save(lancamento({ tipo: 'DESPESA', valor: 800 }));
+    await repo.save(
+      lancamento({
+        tipo: 'DESPESA',
+        valor: 180,
+        origemRegraId: 'luz',
+        ocorrenciaIndice: 1,
+      }).registrarPagamento(true, 150),
+    );
+
+    const resumo = await useCase.execute('2026-05', 'REALIZADO');
+
+    expect(resumo.totalDespesas).toBe(950);
+  });
+
+  it('o modo PREVISTO é o padrão quando nenhum é informado', async () => {
+    await repo.save(
+      lancamento({ tipo: 'DESPESA', valor: 300, origemRegraId: 'regra-1', ocorrenciaIndice: 1 }),
+    );
+
+    const semModo = await useCase.execute('2026-05');
+    const comModo = await useCase.execute('2026-05', 'PREVISTO');
+
+    expect(semModo).toEqual(comModo);
+    expect(semModo.totalDespesas).toBe(300);
   });
 
   it('considera apenas lançamentos da competência solicitada', async () => {

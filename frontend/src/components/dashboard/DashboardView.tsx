@@ -36,6 +36,8 @@ import type {
 import { dashboardApi, type DashboardData } from '@/lib/api/dashboard';
 import { competenciaLabel, isCompetenciaValida } from '@/lib/competencia';
 import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
+import { useModoValor } from '@/components/modo/ModoValorProvider';
+import { SeletorModo } from '@/components/modo/SeletorModo';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -60,6 +62,7 @@ const CORES_FALLBACK = [
 
 export function DashboardView() {
   const { competencia, setCompetencia } = useCompetencia();
+  const { modo } = useModoValor();
   const searchParams = useSearchParams();
 
   // Deep-link: na 1ª carga, ?competencia= válido alimenta o estado global (URL vence).
@@ -83,13 +86,13 @@ export function DashboardView() {
     async (comEsqueleto: boolean) => {
       if (comEsqueleto) setStatus('loading');
       try {
-        setDados(await dashboardApi.carregar(competencia));
+        setDados(await dashboardApi.carregar(competencia, modo));
         setStatus('ready');
       } catch {
         if (comEsqueleto) setStatus('error');
       }
     },
-    [competencia],
+    [competencia, modo],
   );
 
   const carregar = useCallback(() => recarregar(true), [recarregar]);
@@ -105,10 +108,13 @@ export function DashboardView() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">{competenciaLabel(competencia)}</p>
+          <p className="text-sm text-muted-foreground">
+            {competenciaLabel(competencia)} · {modo === 'PREVISTO' ? 'previsto' : 'realizado'}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <NavegacaoMeses />
+          <SeletorModo />
           {dados && (
             <LancamentoFormDialog
               competencia={competencia}
@@ -172,6 +178,7 @@ export function DashboardView() {
               icone={PiggyBank}
               cor="text-primary"
               fundo="bg-primary/10"
+              detalhe={`até ${competenciaLabel(competencia)}`}
             />
             <KpiCard
               rotulo="Carteira"
@@ -224,7 +231,7 @@ export function DashboardView() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">
-                  Previsto vs pago — {competencia.slice(0, 4)}
+                  Orçado vs realizado — {competencia.slice(0, 4)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -493,13 +500,13 @@ function rotuloSerie(chave: string): string {
 function rotuloPrevistoPago(chave: string): string {
   switch (chave) {
     case 'receitasPrevisto':
-      return 'Receitas (previsto)';
+      return 'Receitas (orçado)';
     case 'receitasPago':
-      return 'Receitas (pago)';
+      return 'Receitas (realizado)';
     case 'despesasPrevisto':
-      return 'Despesas (previsto)';
+      return 'Despesas (orçado)';
     case 'despesasPago':
-      return 'Despesas (pago)';
+      return 'Despesas (realizado)';
     default:
       return chave;
   }

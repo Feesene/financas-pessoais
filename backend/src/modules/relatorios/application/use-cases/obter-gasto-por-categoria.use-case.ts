@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { GastoPorCategoriaItemDTO } from '@financas-pessoais/shared';
+import type { GastoPorCategoriaItemDTO, ModoValor } from '@financas-pessoais/shared';
 import {
   CATEGORIA_QUERY_PORT,
   type CategoriaQueryPort,
@@ -21,11 +21,15 @@ export class ObterGastoPorCategoriaUseCase {
    * Agrega despesas por categoria no período e calcula a participação (0..1) sobre o total
    * de despesas. Mostra apenas categorias com gasto > 0 (D4), ordenadas desc por total.
    */
-  async execute(de: string, ate: string): Promise<GastoPorCategoriaItemDTO[]> {
+  async execute(
+    de: string,
+    ate: string,
+    modo: ModoValor = 'PREVISTO',
+  ): Promise<GastoPorCategoriaItemDTO[]> {
     validarIntervalo(de, ate);
 
     const [despesas, categorias] = await Promise.all([
-      this.lancamentos.somarDespesaPorCategoria(de, ate),
+      this.lancamentos.somarDespesaPorCategoria(de, ate, modo),
       this.categorias.listar(),
     ]);
 

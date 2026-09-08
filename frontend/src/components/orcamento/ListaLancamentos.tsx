@@ -1,4 +1,9 @@
-import type { LancamentoDTO, TipoLancamento } from '@financas-pessoais/shared';
+import {
+  somarNoModo,
+  type LancamentoDTO,
+  type ModoValor,
+  type TipoLancamento,
+} from '@financas-pessoais/shared';
 import { formatarReais } from '@/lib/format';
 import { LancamentoItem } from './LancamentoItem';
 
@@ -11,6 +16,7 @@ const ORDEM_TIPOS: TipoLancamento[] = ['RECEITA', 'DESPESA'];
 
 interface Props {
   lancamentos: LancamentoDTO[];
+  modo: ModoValor;
   onAlterado: () => void;
 }
 
@@ -24,11 +30,16 @@ function agruparPorCategoria(lancamentos: LancamentoDTO[]): Map<string, Lancamen
   return grupos;
 }
 
-function subtotal(itens: LancamentoDTO[]): number {
-  return itens.reduce((soma, l) => soma + l.valor, 0);
+/**
+ * Mesma definição usada pelos cards de totais e pelos relatórios, no mesmo modo
+ * que a tela está exibindo. Somar `valor` aqui fazia o subtotal divergir do card
+ * "Despesas" logo acima.
+ */
+function subtotal(itens: LancamentoDTO[], modo: ModoValor): number {
+  return somarNoModo(itens, modo);
 }
 
-export function ListaLancamentos({ lancamentos, onAlterado }: Props) {
+export function ListaLancamentos({ lancamentos, modo, onAlterado }: Props) {
   return (
     <div className="space-y-8">
       {ORDEM_TIPOS.map((tipo) => {
@@ -46,7 +57,7 @@ export function ListaLancamentos({ lancamentos, onAlterado }: Props) {
                   receita ? 'text-success' : 'text-destructive'
                 }`}
               >
-                {formatarReais(subtotal(doTipo))}
+                {formatarReais(subtotal(doTipo, modo))}
               </span>
             </div>
 
@@ -57,7 +68,7 @@ export function ListaLancamentos({ lancamentos, onAlterado }: Props) {
                     {categoria}
                   </h3>
                   <span className="text-xs font-medium tabular-nums text-muted-foreground">
-                    {formatarReais(subtotal(itens))}
+                    {formatarReais(subtotal(itens, modo))}
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -65,6 +76,7 @@ export function ListaLancamentos({ lancamentos, onAlterado }: Props) {
                     <LancamentoItem
                       key={lancamento.id}
                       lancamento={lancamento}
+                      modo={modo}
                       onAlterado={onAlterado}
                     />
                   ))}

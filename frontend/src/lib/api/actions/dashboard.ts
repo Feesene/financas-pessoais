@@ -5,6 +5,7 @@ import type {
   EvolucaoMensalItemDTO,
   EvolucaoReservaItemDTO,
   GastoPorCategoriaItemDTO,
+  ModoValor,
   PosicaoCarteiraDTO,
   PrevistoPagoItemDTO,
   ResumoMensalDTO,
@@ -20,7 +21,10 @@ import type { DashboardData } from '../dashboard';
  * materialização do ano e as oito consultas aqui troca ~20 idas ao servidor
  * por uma só — no servidor as consultas rodam em paralelo contra a API.
  */
-export async function carregarDashboard(competencia: string): Promise<ApiResult<DashboardData>> {
+export async function carregarDashboard(
+  competencia: string,
+  modo: ModoValor = 'PREVISTO',
+): Promise<ApiResult<DashboardData>> {
   const ano = competencia.slice(0, 4);
 
   // Materializa o ano inteiro em uma chamada (alimenta resumo, consumo e
@@ -34,6 +38,10 @@ export async function carregarDashboard(competencia: string): Promise<ApiResult<
   for (let i = 0; i < 5; i++) inicio6m = mesAnterior(inicio6m);
 
   const comp = encodeURIComponent(competencia);
+
+  // O saldo das reservas segue a competência do painel: sem o filtro, um aporte
+  // lançado num mês futuro já aparecia no "Total reservado" de hoje, e o card
+  // contradizia a mesma tela de Reservas, que sempre filtrou por competência.
   const [
     resumo,
     consumo,
@@ -44,11 +52,15 @@ export async function carregarDashboard(competencia: string): Promise<ApiResult<
     evolucaoReservas,
     previstoPago,
   ] = await Promise.all([
-    apiRequest<ResumoMensalDTO>(`/lancamentos/resumo?competencia=${comp}`),
-    apiRequest<ConsumoCategoriaDTO[]>(`/categorias/consumo?competencia=${comp}`),
-    apiRequest<EvolucaoMensalItemDTO[]>(`/relatorios/evolucao?de=${inicio6m}&ate=${comp}`),
-    apiRequest<GastoPorCategoriaItemDTO[]>(`/relatorios/por-categoria?de=${comp}&ate=${comp}`),
-    apiRequest<SaldosReservaDTO>('/reservas/saldos'),
+    apiRequest<ResumoMensalDTO>(`/lancamentos/resumo?competencia=${comp}&modo=${modo}`),
+    apiRequest<ConsumoCategoriaDTO[]>(`/categorias/consumo?competencia=${comp}&modo=${modo}`),
+    apiRequest<EvolucaoMensalItemDTO[]>(
+      `/relatorios/evolucao?de=${inicio6m}&ate=${comp}&modo=${modo}`,
+    ),
+    apiRequest<GastoPorCategoriaItemDTO[]>(
+      `/relatorios/por-categoria?de=${comp}&ate=${comp}&modo=${modo}`,
+    ),
+    apiRequest<SaldosReservaDTO>(`/reservas/saldos?competencia=${comp}`),
     apiRequest<PosicaoCarteiraDTO>('/carteira/posicao'),
     apiRequest<EvolucaoReservaItemDTO[]>(`/reservas/evolucao-anual?ano=${ano}`),
     apiRequest<PrevistoPagoItemDTO[]>(`/relatorios/previsto-pago?de=${ano}-01&ate=${ano}-12`),

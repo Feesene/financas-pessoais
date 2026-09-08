@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { formatarCompetencia, parseCompetencia } from '@/lib/competencia';
+import { useCompetencia } from '@/components/competencia/CompetenciaProvider';
 import { cn } from '@/lib/utils';
 import { HistoricoTabela } from './HistoricoTabela';
 import { GraficosRelatorio } from './GraficosRelatorio';
@@ -18,11 +20,20 @@ const ABAS: { id: Aba; rotulo: string }[] = [
 ];
 
 export function RelatoriosView() {
-  const [ano, setAno] = useState(() => new Date().getFullYear());
+  // O ano dos relatórios é uma leitura da competência global, não um estado
+  // próprio: com dois estados, sair daqui em 2025 e voltar ao Orçamento levava
+  // a 2026 sem que nada na tela explicasse a mudança.
+  const { competencia, setCompetencia } = useCompetencia();
+  const { ano, mes } = parseCompetencia(competencia);
   const [aba, setAba] = useState<Aba>('historico');
 
   const de = `${ano}-01`;
   const ate = `${ano}-12`;
+
+  /** Trocar o ano aqui move a competência global, preservando o mês. */
+  function selecionarAno(novoAno: number) {
+    setCompetencia(formatarCompetencia(novoAno, mes));
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
@@ -32,7 +43,7 @@ export function RelatoriosView() {
           <p className="text-sm text-muted-foreground">Consolidado e análises do período.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <SeletorAno ano={ano} onSelecionar={setAno} />
+          <SeletorAno ano={ano} onSelecionar={selecionarAno} />
           <ExportarButton de={de} ate={ate} />
         </div>
       </header>

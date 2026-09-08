@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ConsumoCategoriaDTO } from '@financas-pessoais/shared';
+import { valorNoModo, type ConsumoCategoriaDTO, type ModoValor } from '@financas-pessoais/shared';
 import {
   CATEGORIA_REPOSITORY,
   type CategoriaRepository,
@@ -19,7 +19,7 @@ export class ObterConsumoCategoriasUseCase {
     @Inject(LANCAMENTO_REPOSITORY) private readonly lancamentos: LancamentoRepository,
   ) {}
 
-  async execute(competencia: string): Promise<ConsumoCategoriaDTO[]> {
+  async execute(competencia: string, modo: ModoValor = 'PREVISTO'): Promise<ConsumoCategoriaDTO[]> {
     const [categorias, metas, lancamentos] = await Promise.all([
       this.categorias.findAll(),
       this.metas.findByCompetencia(competencia),
@@ -33,7 +33,10 @@ export class ObterConsumoCategoriasUseCase {
     for (const lancamento of lancamentos) {
       if (lancamento.tipo !== 'DESPESA' || lancamento.categoriaId === null) continue;
       const atual = gastoEmCentavos.get(lancamento.categoriaId) ?? 0;
-      gastoEmCentavos.set(lancamento.categoriaId, atual + Math.round(lancamento.valorEfetivo * 100));
+      gastoEmCentavos.set(
+        lancamento.categoriaId,
+        atual + Math.round(valorNoModo(lancamento, modo) * 100),
+      );
     }
 
     return categorias

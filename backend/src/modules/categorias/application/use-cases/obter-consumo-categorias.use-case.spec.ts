@@ -127,6 +127,32 @@ describe('ObterConsumoCategoriasUseCase', () => {
     expect(consumo.gasto).toBe(237);
   });
 
+  it('no modo REALIZADO a meta só consome o que já se moveu', async () => {
+    await seedCategoria('desp', 'DESPESA');
+    await definirMeta.execute({ categoriaId: 'desp', competencia: COMPETENCIA, valor: 500 });
+    // Manual conta sempre; a ocorrência em aberto fica de fora do realizado.
+    await seedDespesa('desp', 120, 'manual-1');
+    await lancamentos.save(
+      Lancamento.criar({
+        id: 'ocorrencia-aberta',
+        tipo: 'DESPESA',
+        categoria: 'desp',
+        categoriaId: 'desp',
+        descricao: null,
+        valor: 300,
+        competencia: COMPETENCIA,
+        origemRegraId: 'regra-1',
+        ocorrenciaIndice: 1,
+      }),
+    );
+
+    const [previsto] = await useCase.execute(COMPETENCIA, 'PREVISTO');
+    const [realizado] = await useCase.execute(COMPETENCIA, 'REALIZADO');
+
+    expect(previsto.gasto).toBe(420);
+    expect(realizado.gasto).toBe(120);
+  });
+
   it('lançamento sem categoriaId (texto livre) não conta no consumo da categoria', async () => {
     await seedCategoria('desp', 'DESPESA');
     await definirMeta.execute({ categoriaId: 'desp', competencia: COMPETENCIA, valor: 500 });

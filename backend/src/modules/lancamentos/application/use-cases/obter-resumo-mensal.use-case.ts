@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ResumoMensalDTO } from '@financas-pessoais/shared';
+import { valorNoModo, type ModoValor, type ResumoMensalDTO } from '@financas-pessoais/shared';
 import {
   LANCAMENTO_REPOSITORY,
   type LancamentoRepository,
@@ -11,20 +11,17 @@ export class ObterResumoMensalUseCase {
     @Inject(LANCAMENTO_REPOSITORY) private readonly lancamentos: LancamentoRepository,
   ) {}
 
-  async execute(competencia: string): Promise<ResumoMensalDTO> {
+  async execute(competencia: string, modo: ModoValor = 'PREVISTO'): Promise<ResumoMensalDTO> {
     const lancamentos = await this.lancamentos.findByCompetencia(competencia);
 
     // Soma em centavos (inteiros) para não acumular erro de ponto flutuante.
-    // Os totais consideram apenas o que já foi efetivado: lançamentos manuais
-    // (sem origem em recorrência) sempre contam; ocorrências de recorrência só
-    // entram quando marcadas como pagas.
+    // `valorNoModo` é a definição única de valor agregável do sistema (ver
+    // shared/lancamento.ts), a mesma usada por metas, relatórios e subtotais da
+    // lista: em PREVISTO toda linha conta, em REALIZADO só o que já se moveu.
     let receitasEmCentavos = 0;
     let despesasEmCentavos = 0;
     for (const lancamento of lancamentos) {
-      const efetivado = lancamento.origemRegraId === null || lancamento.pago;
-      if (!efetivado) continue;
-
-      const centavos = Math.round(lancamento.valorEfetivo * 100);
+      const centavos = Math.round(valorNoModo(lancamento, modo) * 100);
       if (lancamento.tipo === 'RECEITA') {
         receitasEmCentavos += centavos;
       } else {

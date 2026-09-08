@@ -1,9 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, Repeat, Trash2 } from 'lucide-react';
+import { History, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { LancamentoDTO } from '@financas-pessoais/shared';
+import {
+  contaNoModo,
+  valorEfetivo,
+  type LancamentoDTO,
+  type ModoValor,
+} from '@financas-pessoais/shared';
 import { ApiError, lancamentosApi } from '@/lib/api/lancamentos';
 import { formatarReais } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -21,21 +26,27 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LancamentoFormDialog } from './LancamentoFormDialog';
 import { PagamentoDialog } from './PagamentoDialog';
+import { HistoricoRecorrenciaDialog } from './HistoricoRecorrenciaDialog';
 
 interface Props {
   lancamento: LancamentoDTO;
+  modo: ModoValor;
   onAlterado: () => void;
 }
 
-export function LancamentoItem({ lancamento, onAlterado }: Props) {
+export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
   const [excluindo, setExcluindo] = useState(false);
   const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
   const receita = lancamento.tipo === 'RECEITA';
   const deRegra = lancamento.origemRegraId !== null;
   const pago = lancamento.pago;
-  const valorReal = pago && lancamento.valorPago !== null ? lancamento.valorPago : lancamento.valor;
-  const mostraReal = pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
+  const valorReal = valorEfetivo(lancamento);
+  // No modo Realizado a ocorrência ainda não paga continua na lista, mas fora do
+  // subtotal — o esmaecido explica por que os números não fecham com a leitura.
+  const foraDoTotal = !contaNoModo(lancamento, modo);
+  const mostraReal =
+    pago && lancamento.valorPago !== null && lancamento.valorPago !== lancamento.valor;
 
   function aoAlternarPago(marcando: boolean) {
     if (marcando) {
@@ -76,7 +87,13 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40">
+    <div
+      className={cn(
+        'flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40',
+        foraDoTotal && 'opacity-55',
+      )}
+      title={foraDoTotal ? 'Ainda não paga — fora do total realizado' : undefined}
+    >
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 font-medium">
           {deRegra && (
@@ -125,6 +142,22 @@ export function LancamentoItem({ lancamento, onAlterado }: Props) {
       </div>
 
       <div className="flex shrink-0 gap-1">
+        {deRegra && (
+          <HistoricoRecorrenciaDialog
+            lancamento={lancamento}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Histórico da recorrência"
+                title="Histórico da recorrência"
+              >
+                <History />
+              </Button>
+            }
+          />
+        )}
+
         <LancamentoFormDialog
           competencia={lancamento.competencia}
           lancamento={lancamento}

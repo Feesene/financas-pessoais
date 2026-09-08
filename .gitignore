@@ -28,6 +28,8 @@ npm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 *.swp
+# Preferências locais do Claude Code (permissões da máquina); launch.json é compartilhado.
+.claude/settings.local.json
 
 # Test / coverage
 coverage/

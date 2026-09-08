@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { EvolucaoMensalItemDTO } from '@financas-pessoais/shared';
+import type { EvolucaoMensalItemDTO, ModoValor } from '@financas-pessoais/shared';
 import { intervaloCompetencias } from '../../domain/competencia';
 import {
   LANCAMENTO_QUERY_PORT,
@@ -17,10 +17,14 @@ export class ObterEvolucaoUseCase {
    * Retorna receitas, despesas e saldo (receitas − despesas) por competência no intervalo.
    * Meses sem dados aparecem zerados (série temporal contínua).
    */
-  async execute(de: string, ate: string): Promise<EvolucaoMensalItemDTO[]> {
+  async execute(
+    de: string,
+    ate: string,
+    modo: ModoValor = 'PREVISTO',
+  ): Promise<EvolucaoMensalItemDTO[]> {
     validarIntervalo(de, ate);
 
-    const lancamentos = await this.lancamentos.somarPorTipoECompetencia(de, ate);
+    const lancamentos = await this.lancamentos.somarPorTipoECompetencia(de, ate, modo);
     const porMes = new Map(lancamentos.map((l) => [l.competencia, l]));
 
     return intervaloCompetencias(de, ate).map((competencia) => {

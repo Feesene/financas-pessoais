@@ -4,6 +4,8 @@ export interface LancamentoRepository {
   save(lancamento: Lancamento): Promise<void>;
   /** Lista os lançamentos de um mês de competência (AAAA-MM). */
   findByCompetencia(competencia: string): Promise<Lancamento[]>;
+  /** Lista as ocorrências materializadas de uma regra, da mais antiga para a mais recente. */
+  findByOrigemRegraId(origemRegraId: string): Promise<Lancamento[]>;
   /** Busca um lançamento pelo id; null se não existir. */
   findById(id: string): Promise<Lancamento | null>;
   /** Indica se existe ao menos um lançamento vinculado à categoria. */

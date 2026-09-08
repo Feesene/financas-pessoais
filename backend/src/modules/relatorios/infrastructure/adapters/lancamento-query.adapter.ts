@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { contaNoModo, valorNoModo, type ModoValor } from '@financas-pessoais/shared';
 import {
   LANCAMENTO_REPOSITORY,
   type LancamentoRepository,
@@ -18,7 +19,11 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
     @Inject(LANCAMENTO_REPOSITORY) private readonly lancamentos: LancamentoRepository,
   ) {}
 
-  async somarPorTipoECompetencia(de: string, ate: string): Promise<SomaTipoCompetencia[]> {
+  async somarPorTipoECompetencia(
+    de: string,
+    ate: string,
+    modo: ModoValor = 'PREVISTO',
+  ): Promise<SomaTipoCompetencia[]> {
     const competencias = intervaloCompetencias(de, ate);
     const porMes = await Promise.all(
       competencias.map(async (competencia) => {
@@ -27,7 +32,7 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
         let receitasCentavos = 0;
         let despesasCentavos = 0;
         for (const lancamento of lancamentos) {
-          const centavos = Math.round(lancamento.valorEfetivo * 100);
+          const centavos = Math.round(valorNoModo(lancamento, modo) * 100);
           if (lancamento.tipo === 'RECEITA') receitasCentavos += centavos;
           else despesasCentavos += centavos;
         }
@@ -41,7 +46,11 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
     return porMes.filter((m): m is SomaTipoCompetencia => m !== null);
   }
 
-  async somarDespesaPorCategoria(de: string, ate: string): Promise<DespesaPorCategoria[]> {
+  async somarDespesaPorCategoria(
+    de: string,
+    ate: string,
+    modo: ModoValor = 'PREVISTO',
+  ): Promise<DespesaPorCategoria[]> {
     const competencias = intervaloCompetencias(de, ate);
     const listas = await Promise.all(
       competencias.map((competencia) => this.lancamentos.findByCompetencia(competencia)),
@@ -55,7 +64,7 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
         const chave = lancamento.categoriaId;
         porCategoria.set(
           chave,
-          (porCategoria.get(chave) ?? 0) + Math.round(lancamento.valorEfetivo * 100),
+          (porCategoria.get(chave) ?? 0) + Math.round(valorNoModo(lancamento, modo) * 100),
         );
       }
     }
@@ -80,8 +89,13 @@ export class LancamentoQueryAdapter implements LancamentoQueryPort {
         let despesasPrevisto = 0;
         let despesasPago = 0;
         for (const lancamento of lancamentos) {
+          // "Previsto" é o valor como foi orçado; "pago" é o realizado, com a
+          // mesma regra do modo REALIZADO — lançamento manual conta sempre, já
+          // que é registro de fato consumado e nem admite marcação de pagamento.
           const previsto = Math.round(lancamento.valor * 100);
-          const pago = lancamento.pago ? Math.round(lancamento.valorEfetivo * 100) : 0;
+          const pago = contaNoModo(lancamento, 'REALIZADO')
+            ? Math.round(lancamento.valorEfetivo * 100)
+            : 0;
           if (lancamento.tipo === 'RECEITA') {
             receitasPrevisto += previsto;
             receitasPago += pago;

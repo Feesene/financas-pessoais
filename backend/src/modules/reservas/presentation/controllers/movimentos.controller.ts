@@ -26,6 +26,7 @@ export class MovimentosController {
         valor: body.valor,
         competencia: body.competencia,
         descricao: body.descricao ?? null,
+        permitirNegativo: body.permitirNegativo ?? false,
       });
     } catch (error) {
       throw this.mapErro(error);

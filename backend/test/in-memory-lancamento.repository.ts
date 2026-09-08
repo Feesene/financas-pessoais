@@ -13,6 +13,12 @@ export class InMemoryLancamentoRepository implements LancamentoRepository {
     return [...this.store.values()].filter((l) => l.competencia === competencia);
   }
 
+  async findByOrigemRegraId(origemRegraId: string): Promise<Lancamento[]> {
+    return [...this.store.values()]
+      .filter((l) => l.origemRegraId === origemRegraId)
+      .sort((a, b) => a.competencia.localeCompare(b.competencia));
+  }
+
   async findById(id: string): Promise<Lancamento | null> {
     return this.store.get(id) ?? null;
   }

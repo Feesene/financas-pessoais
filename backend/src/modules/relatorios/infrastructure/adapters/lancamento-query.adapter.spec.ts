@@ -103,7 +103,7 @@ describe('LancamentoQueryAdapter', () => {
   });
 
   describe('somarPrevistoPagoPorCompetencia', () => {
-    it('separa previsto (valor) e pago (valorEfetivo só quando pago=true)', async () => {
+    it('separa o orçado (valor) do realizado (valorEfetivo do que já se moveu)', async () => {
       const adapter = new LancamentoQueryAdapter(
         repoComLancamentos([
           lancamento({
@@ -130,18 +130,20 @@ describe('LancamentoQueryAdapter', () => {
 
       const serie = await adapter.somarPrevistoPagoPorCompetencia('2026-05', '2026-05');
 
+      // A despesa manual de 100 entra nos dois lados: ela é registro de um gasto
+      // que já aconteceu, não uma previsão à espera de marcação (INC-06).
       expect(serie).toEqual([
         {
           competencia: '2026-05',
           receitasPrevisto: 5000,
           receitasPago: 5000,
           despesasPrevisto: 3300,
-          despesasPago: 2800,
+          despesasPago: 2900,
         },
       ]);
     });
 
-    it('zera "pago" quando só há lançamentos manuais (nunca pagos)', async () => {
+    it('conta lançamentos manuais como realizados, não como pendentes', async () => {
       const adapter = new LancamentoQueryAdapter(
         repoComLancamentos([
           lancamento({ tipo: 'RECEITA', valor: 1000, competencia: '2026-06' }),
@@ -151,12 +153,40 @@ describe('LancamentoQueryAdapter', () => {
 
       const serie = await adapter.somarPrevistoPagoPorCompetencia('2026-06', '2026-06');
 
+      // Um mês só de lançamentos manuais está inteiramente realizado: zerar o
+      // lado "pago" desenhava um mês em que nada tinha acontecido.
       expect(serie).toEqual([
         {
           competencia: '2026-06',
           receitasPrevisto: 1000,
-          receitasPago: 0,
+          receitasPago: 1000,
           despesasPrevisto: 400,
+          despesasPago: 400,
+        },
+      ]);
+    });
+
+    it('deixa fora do realizado a ocorrência de recorrência ainda não paga', async () => {
+      const adapter = new LancamentoQueryAdapter(
+        repoComLancamentos([
+          lancamento({
+            tipo: 'DESPESA',
+            valor: 2000,
+            competencia: '2026-07',
+            origemRegraId: 'aluguel',
+            ocorrenciaIndice: 1,
+          }),
+        ]),
+      );
+
+      const serie = await adapter.somarPrevistoPagoPorCompetencia('2026-07', '2026-07');
+
+      expect(serie).toEqual([
+        {
+          competencia: '2026-07',
+          receitasPrevisto: 0,
+          receitasPago: 0,
+          despesasPrevisto: 2000,
           despesasPago: 0,
         },
       ]);
