@@ -30,16 +30,28 @@ interface Props {
   competencia: string;
   /** Quando presente, o diálogo opera em modo edição. */
   lancamento?: LancamentoDTO;
-  trigger: React.ReactNode;
+  /** Opcional quando o diálogo é aberto de fora (ex.: item de menu) via `aberto`. */
+  trigger?: React.ReactNode;
+  /** Controle externo da abertura; sem ele o diálogo abre pelo `trigger`. */
+  aberto?: boolean;
+  onAbertoChange?: (aberto: boolean) => void;
   onSalvo: () => void;
 }
 
 /** Valor sentinela do seletor para o modo de texto livre ("Outra"). */
 const OUTRA = '__outra__';
 
-export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo }: Props) {
+export function LancamentoFormDialog({
+  competencia,
+  lancamento,
+  trigger,
+  aberto: abertoExterno,
+  onAbertoChange,
+  onSalvo,
+}: Props) {
   const edicao = Boolean(lancamento);
-  const [aberto, setAberto] = useState(false);
+  const [abertoInterno, setAbertoInterno] = useState(false);
+  const aberto = abertoExterno ?? abertoInterno;
   const [tipo, setTipo] = useState<TipoLancamento>(lancamento?.tipo ?? 'DESPESA');
   /** Valor atual do seletor: id de uma categoria cadastrada, OUTRA, ou '' (nada escolhido). */
   const [selecao, setSelecao] = useState('');
@@ -73,16 +85,20 @@ export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo
     setValor(lancamento ? String(lancamento.valor) : '');
   }
 
-  function aoMudarAbertura(estado: boolean) {
-    setAberto(estado);
-    if (estado) {
-      resetar();
-      categoriasApi
-        .listar()
-        .then(setCategorias)
-        .catch(() => setCategorias([]));
-    }
+  function setAberto(estado: boolean) {
+    setAbertoInterno(estado);
+    onAbertoChange?.(estado);
   }
+
+  // Reinicia o formulário a cada abertura — seja pelo trigger ou pelo controle externo.
+  useEffect(() => {
+    if (!aberto) return;
+    resetar();
+    categoriasApi
+      .listar()
+      .then(setCategorias)
+      .catch(() => setCategorias([]));
+  }, [aberto]);
 
   // Pré-seleção em modo edição assim que as categorias chegam (T4): casa pelo id;
   // se o id não existir mais (categoria excluída) cai em "Outra" preservando o nome.
@@ -141,8 +157,8 @@ export function LancamentoFormDialog({ competencia, lancamento, trigger, onSalvo
   }
 
   return (
-    <Dialog open={aberto} onOpenChange={aoMudarAbertura}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={aberto} onOpenChange={setAberto}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{edicao ? 'Editar lançamento' : 'Novo lançamento'}</DialogTitle>

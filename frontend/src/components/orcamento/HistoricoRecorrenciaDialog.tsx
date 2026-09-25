@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { HistoricoRecorrenciaDTO, LancamentoDTO } from '@financas-pessoais/shared';
 import { lancamentosApi } from '@/lib/api/lancamentos';
 import { competenciaLabel } from '@/lib/competencia';
@@ -21,32 +21,56 @@ type Status = 'loading' | 'ready' | 'error';
 interface Props {
   /** Lançamento gerado pela regra; serve de rótulo e de destaque na lista. */
   lancamento: LancamentoDTO;
-  trigger: React.ReactNode;
+  /** Opcional quando o diálogo é aberto de fora (ex.: item de menu) via `aberto`. */
+  trigger?: React.ReactNode;
+  /** Controle externo da abertura; sem ele o diálogo abre pelo `trigger`. */
+  aberto?: boolean;
+  onAbertoChange?: (aberto: boolean) => void;
 }
 
 /** Histórico de todas as ocorrências já lançadas por uma recorrência (previsto x pago). */
-export function HistoricoRecorrenciaDialog({ lancamento, trigger }: Props) {
-  const [aberto, setAberto] = useState(false);
+export function HistoricoRecorrenciaDialog({
+  lancamento,
+  trigger,
+  aberto: abertoExterno,
+  onAbertoChange,
+}: Props) {
+  const [abertoInterno, setAbertoInterno] = useState(false);
+  const aberto = abertoExterno ?? abertoInterno;
   const [historico, setHistorico] = useState<HistoricoRecorrenciaDTO | null>(null);
   const [status, setStatus] = useState<Status>('loading');
 
-  async function aoMudarAbertura(estado: boolean) {
-    setAberto(estado);
-    if (!estado || lancamento.origemRegraId === null) return;
-    setStatus('loading');
-    try {
-      setHistorico(await lancamentosApi.historicoRecorrencia(lancamento.origemRegraId));
-      setStatus('ready');
-    } catch {
-      setStatus('error');
-    }
+  function setAberto(estado: boolean) {
+    setAbertoInterno(estado);
+    onAbertoChange?.(estado);
   }
+
+  // Recarrega o histórico a cada abertura — seja pelo trigger ou pelo controle externo.
+  useEffect(() => {
+    const regraId = lancamento.origemRegraId;
+    if (!aberto || regraId === null) return;
+    let cancelado = false;
+    setStatus('loading');
+    lancamentosApi
+      .historicoRecorrencia(regraId)
+      .then((h) => {
+        if (cancelado) return;
+        setHistorico(h);
+        setStatus('ready');
+      })
+      .catch(() => {
+        if (!cancelado) setStatus('error');
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [aberto, lancamento.origemRegraId]);
 
   const ocorrencias = historico?.ocorrencias ?? [];
 
   return (
-    <Dialog open={aberto} onOpenChange={aoMudarAbertura}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={aberto} onOpenChange={setAberto}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Histórico da recorrência</DialogTitle>
