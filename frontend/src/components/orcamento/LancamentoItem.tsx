@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { History, Pencil, Repeat, Trash2 } from 'lucide-react';
+import { History, MoreVertical, Pencil, Repeat, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   contaNoModo,
@@ -22,8 +22,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { LancamentoFormDialog } from './LancamentoFormDialog';
 import { PagamentoDialog } from './PagamentoDialog';
 import { HistoricoRecorrenciaDialog } from './HistoricoRecorrenciaDialog';
@@ -38,6 +44,9 @@ export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
   const [excluindo, setExcluindo] = useState(false);
   const [registrandoPagamento, setRegistrandoPagamento] = useState(false);
   const [pagamentoAberto, setPagamentoAberto] = useState(false);
+  const [edicaoAberta, setEdicaoAberta] = useState(false);
+  const [historicoAberto, setHistoricoAberto] = useState(false);
+  const [exclusaoAberta, setExclusaoAberta] = useState(false);
   const receita = lancamento.tipo === 'RECEITA';
   const deRegra = lancamento.origemRegraId !== null;
   const pago = lancamento.pago;
@@ -89,20 +98,22 @@ export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-accent/40',
+        'flex items-center gap-2 rounded-lg border bg-card px-3 py-3 transition-colors hover:bg-accent/40 sm:gap-3 sm:px-4',
         foraDoTotal && 'opacity-55',
       )}
       title={foraDoTotal ? 'Ainda não paga — fora do total realizado' : undefined}
     >
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-1.5 font-medium">
+        <p className="flex items-start gap-1.5 font-medium">
           {deRegra && (
             <Repeat
-              className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+              className="mt-1 h-3.5 w-3.5 shrink-0 text-muted-foreground"
               aria-label="Gerado por recorrência"
             />
           )}
-          <span className="truncate">{lancamento.descricao ?? lancamento.categoria}</span>
+          <span className="line-clamp-2 min-w-0 break-words">
+            {lancamento.descricao ?? lancamento.categoria}
+          </span>
         </p>
         {lancamento.descricao && (
           <p className="truncate text-xs text-muted-foreground">{lancamento.categoria}</p>
@@ -121,14 +132,14 @@ export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
             disabled={registrandoPagamento}
             onChange={(e) => aoAlternarPago(e.target.checked)}
           />
-          Pago
+          <span className="sr-only sm:not-sr-only">Pago</span>
         </label>
       )}
 
       <div className="flex shrink-0 flex-col items-end">
         <span
           className={cn(
-            'font-semibold tabular-nums',
+            'whitespace-nowrap font-semibold tabular-nums',
             receita ? 'text-success' : 'text-destructive',
           )}
         >
@@ -141,70 +152,115 @@ export function LancamentoItem({ lancamento, modo, onAlterado }: Props) {
         )}
       </div>
 
-      <div className="flex shrink-0 gap-1">
+      {/* Desktop: ações sempre visíveis. */}
+      <div className="hidden shrink-0 gap-1 sm:flex">
         {deRegra && (
-          <HistoricoRecorrenciaDialog
-            lancamento={lancamento}
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Histórico da recorrência"
-                title="Histórico da recorrência"
-              >
-                <History />
-              </Button>
-            }
-          />
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Histórico da recorrência"
+            title="Histórico da recorrência"
+            onClick={() => setHistoricoAberto(true)}
+          >
+            <History />
+          </Button>
         )}
-
-        <LancamentoFormDialog
-          competencia={lancamento.competencia}
-          lancamento={lancamento}
-          onSalvo={onAlterado}
-          trigger={
-            <Button variant="ghost" size="icon" aria-label="Editar" title="Editar">
-              <Pencil />
-            </Button>
-          }
-        />
-
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Excluir"
-              title="Excluir"
-              disabled={excluindo}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação não pode ser desfeita. O lançamento{' '}
-                <strong>{lancamento.descricao ?? lancamento.categoria}</strong> (
-                {formatarReais(lancamento.valor)}) será removido permanentemente.
-                {deRegra &&
-                  ' Por ter origem em uma recorrência, esta ocorrência não será recriada ao reabrir o mês.'}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={excluir}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Editar"
+          title="Editar"
+          onClick={() => setEdicaoAberta(true)}
+        >
+          <Pencil />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Excluir"
+          title="Excluir"
+          disabled={excluindo}
+          className="text-muted-foreground hover:text-destructive"
+          onClick={() => setExclusaoAberta(true)}
+        >
+          <Trash2 />
+        </Button>
       </div>
+
+      {/* Mobile: ações agrupadas num menu para sobrar espaço para a descrição. */}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="-mr-2 shrink-0 sm:hidden"
+            aria-label="Ações do lançamento"
+          >
+            <MoreVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuItem onSelect={() => setEdicaoAberta(true)}>
+            <Pencil />
+            Editar
+          </DropdownMenuItem>
+          {deRegra && (
+            <DropdownMenuItem onSelect={() => setHistoricoAberto(true)}>
+              <History />
+              Histórico da recorrência
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={excluindo}
+            onSelect={() => setExclusaoAberta(true)}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 />
+            Excluir
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <LancamentoFormDialog
+        competencia={lancamento.competencia}
+        lancamento={lancamento}
+        aberto={edicaoAberta}
+        onAbertoChange={setEdicaoAberta}
+        onSalvo={onAlterado}
+      />
+
+      {deRegra && (
+        <HistoricoRecorrenciaDialog
+          lancamento={lancamento}
+          aberto={historicoAberto}
+          onAbertoChange={setHistoricoAberto}
+        />
+      )}
+
+      <AlertDialog open={exclusaoAberta} onOpenChange={setExclusaoAberta}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O lançamento{' '}
+              <strong>{lancamento.descricao ?? lancamento.categoria}</strong> (
+              {formatarReais(lancamento.valor)}) será removido permanentemente.
+              {deRegra &&
+                ' Por ter origem em uma recorrência, esta ocorrência não será recriada ao reabrir o mês.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={excluir}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {deRegra && (
         <PagamentoDialog
