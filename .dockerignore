@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/*.tsbuildinfo
+financas-v*
+data
+.git
+.env
+.env.*
+*.db
+*.log
+deploy/aws/import

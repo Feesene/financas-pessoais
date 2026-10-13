@@ -1,0 +1,77 @@
+# Stack de produção no servidor AWS Lightsail (ver docs/deploy-aws.md).
+# Executado pelo deploy.sh com: docker compose -p financas --env-file /opt/financas/.env -f deploy/aws/docker-compose.yml
+# Só o Caddy é exposto (80/443); backend e Postgres ficam na rede interna do Docker.
+name: financas
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: financas
+      POSTGRES_DB: financas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/sql:ro
+      - ${IMPORT_DIR:-/opt/financas/import}:/import:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U financas -d financas']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ../..
+      target: backend
+    image: financas-backend:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_TYPE: postgres
+      DATABASE_URL: postgres://financas:${POSTGRES_PASSWORD}@db:5432/financas
+      DATABASE_SSL: 'false'
+      DATABASE_POOL_MAX: 5
+      API_KEY: ${API_KEY:?defina API_KEY no .env}
+      CORS_ORIGINS: https://${SITE_ADDRESS}
+
+  frontend:
+    build:
+      context: ../..
+      target: frontend
+    image: financas-frontend:latest
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend:3001
+      API_KEY: ${API_KEY}
+      APP_PASSWORD: ${APP_PASSWORD:?defina APP_PASSWORD no .env}
+      AUTH_SECRET: ${AUTH_SECRET:?defina AUTH_SECRET no .env}
+      AUTH_SESSION_TTL: ${AUTH_SESSION_TTL:-604800}
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?defina SITE_ADDRESS no .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${STATUS_DIR:-/opt/financas/status}:/srv/status:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
