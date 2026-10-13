@@ -101,8 +101,10 @@ git checkout --quiet --force --detach "$TARGET_COMMIT"
 status building "build das imagens"
 
 # --- 3. Build (um por vez: o servidor tem 1 GB de RAM) --------------------------------------------
-compose build backend
-compose build frontend
+# `docker build` direto (e não `compose build`): funciona com o buildx que o Ubuntu traz. As tags
+# são as mesmas `image:` do docker-compose.yml.
+docker build --quiet --target backend -t financas-backend:latest "$REPO_DIR" >/dev/null
+docker build --quiet --target frontend -t financas-frontend:latest "$REPO_DIR" >/dev/null
 
 # --- 4. Banco: schema base (banco vazio), import de dados pendente e migrations ------------------
 status migrating "banco de dados"
