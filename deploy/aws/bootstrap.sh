@@ -35,7 +35,7 @@ systemctl enable --now docker
 
 # 3. Código.
 if [[ ! -d "$APP_DIR/repo/.git" ]]; then
-  git clone --quiet "$REPO_URL" "$APP_DIR/repo"
+  git clone --quiet --branch "$BOOTSTRAP_BRANCH" "$REPO_URL" "$APP_DIR/repo"
 fi
 
 # 4. Segredos gerados NO servidor (nunca saem dele). A senha de login fica em /opt/financas/.env.
