@@ -47,8 +47,8 @@ o GitHub Actions. Enquanto o PR que criou este deploy não for mergeado, o servi
 
 1. Lightsail → **Create instance** → região `us-east-1` → **Linux/Unix → OS Only → Ubuntu 24.04** → plano
    **micro (1 GB, US$ 7/mês)**.
-2. Em **Launch script**, cole o conteúdo de [`lightsail-launch.sh`](../deploy/aws/lightsail-launch.sh). Opcional:
-   `DATA_URL` com a URL pré-assinada de um export JSON para importar no banco vazio.
+2. Em **Launch script**, cole o conteúdo de [`lightsail-launch.sh`](../deploy/aws/lightsail-launch.sh). Para migrar
+   dados, preencha `IMPORT_TOKEN` com um segredo aleatório (veja **Import de dados** abaixo).
 3. Depois de criada: **Networking → Create static IP** (grátis enquanto anexado) e, no firewall IPv4, libere
    **HTTPS (443)** além de HTTP (80) e SSH (22).
 4. Em ~10–15 minutos o site responde em `https://<ip-com-hifens>.sslip.io`. Para acompanhar, abra
@@ -71,9 +71,15 @@ sudo /opt/financas/repo/deploy/aws/deploy.sh --force
 - **Banco vazio:** o `deploy.sh` aplica `baseline.sql`, uma cópia do schema de produção. As migrations do
   TypeORM supõem que `lancamentos` já existe e não montam o banco do zero. O baseline também marca as migrations
   atuais como aplicadas; **migrations novas rodam automaticamente** a cada deploy (`migration:run`).
-- **Import de dados:** se existir `/opt/financas/import/data.json` quando o banco estiver vazio, ele é importado
-  numa transação por [`import-json.sql`](../deploy/aws/sql/import-json.sql). O formato é um objeto
-  `{ "<tabela>": [linhas] }`. Depois o arquivo é movido para `/opt/financas/state/imported-*.json`.
+- **Import de dados:** com `IMPORT_TOKEN` no launch script, o bootstrap sobe um receptor de **uso único**
+  ([`import-receiver.py`](../deploy/aws/import-receiver.py)), exposto via Caddy/HTTPS. Para enviar o export:
+  ```bash
+  curl -X PUT -H "X-Import-Token: <IMPORT_TOKEN>" --data-binary @data.json https://<site>/_import
+  ```
+  O receptor grava `/opt/financas/import/data.json` e se desliga; a rota passa a responder 502. Em até 2 minutos o
+  `deploy.sh` importa o arquivo numa transação ([`import-json.sql`](../deploy/aws/sql/import-json.sql)), **só se
+  o banco estiver sem dados**, e move o arquivo para `/opt/financas/state/`. O formato é um objeto
+  `{ "<tabela>": [linhas] }`.
 - **Backup manual:** `sudo docker compose -p financas exec -T db pg_dump -U financas financas > backup.sql`.
   Snapshots do Lightsail também funcionam, mas são cobrados à parte.
 

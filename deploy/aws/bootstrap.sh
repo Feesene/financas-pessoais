@@ -4,7 +4,8 @@
 #
 # Variáveis opcionais:
 #   BOOTSTRAP_BRANCH  branch acompanhada até o PR do deploy ser mergeado na main (padrão: main)
-#   DATA_URL          URL (pré-assinada do S3) de um export JSON para importar no banco vazio
+#   IMPORT_TOKEN      se definido, abre um receptor de uso único (PUT https://<site>/_import) para
+#                     receber um export JSON e importá-lo no banco vazio (ver docs/deploy-aws.md)
 #   DOMAIN            domínio próprio; sem ele o site usa <ip>.sslip.io
 set -Eeuo pipefail
 exec > >(tee -a /var/log/financas-bootstrap.log) 2>&1
@@ -18,12 +19,7 @@ umask 077
 mkdir -p "$APP_DIR"/{import,state,status}
 chmod 755 "$APP_DIR" "$APP_DIR/status"
 
-# 1. Export de dados primeiro: a URL pré-assinada expira em poucos minutos.
-if [[ -n "${DATA_URL:-}" && ! -f "$APP_DIR/import/data.json" ]]; then
-  curl -fsS --retry 5 -o "$APP_DIR/import/data.json" "$DATA_URL"
-fi
-
-# 2. Swap de 2 GB: o build do Next.js não cabe em 1 GB de RAM.
+# 1. Swap de 2 GB: o build do Next.js não cabe em 1 GB de RAM.
 if ! swapon --show | grep -q /swapfile; then
   fallocate -l 2G /swapfile
   chmod 600 /swapfile
@@ -32,17 +28,17 @@ if ! swapon --show | grep -q /swapfile; then
   echo '/swapfile none swap sw 0 0' >>/etc/fstab
 fi
 
-# 3. Docker + Compose + git (pacotes do Ubuntu).
+# 2. Docker + Compose + git (pacotes do Ubuntu).
 apt-get update -q
 apt-get install -y -q docker.io docker-compose-v2 docker-buildx git curl
 systemctl enable --now docker
 
-# 4. Código.
+# 3. Código.
 if [[ ! -d "$APP_DIR/repo/.git" ]]; then
   git clone --quiet "$REPO_URL" "$APP_DIR/repo"
 fi
 
-# 5. Segredos gerados NO servidor (nunca saem dele). A senha de login fica em /opt/financas/.env.
+# 4. Segredos gerados NO servidor (nunca saem dele). A senha de login fica em /opt/financas/.env.
 if [[ ! -f "$APP_DIR/.env" ]]; then
   rand() { openssl rand -hex "$1"; }
   cat >"$APP_DIR/.env" <<ENV
@@ -58,7 +54,7 @@ ENV
 fi
 chmod 600 "$APP_DIR/.env"
 
-# 6. Deploy contínuo: verifica o GitHub a cada 2 minutos.
+# 5. Deploy contínuo: verifica o GitHub a cada 2 minutos.
 cat >/etc/systemd/system/financas-deploy.service <<UNIT
 [Unit]
 Description=financas-pessoais: publica o commit novo da main (se houver)
@@ -85,6 +81,13 @@ UNIT
 
 systemctl daemon-reload
 systemctl enable financas-deploy.timer
+
+# 6. Receptor de uso único para o import de dados (opcional).
+if [[ -n "${IMPORT_TOKEN:-}" && ! -f "$APP_DIR/import/data.json" ]]; then
+  printf '%s' "$IMPORT_TOKEN" >"$APP_DIR/import/token"
+  systemd-run --unit financas-import-receiver --property=RuntimeMaxSec=12h \
+    /usr/bin/python3 "$APP_DIR/repo/deploy/aws/import-receiver.py"
+fi
 
 # 7. Primeiro deploy agora (em seguida o timer assume).
 "$APP_DIR/repo/deploy/aws/deploy.sh" --force

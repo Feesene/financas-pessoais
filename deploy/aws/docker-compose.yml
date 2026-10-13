@@ -63,6 +63,8 @@ services:
     ports:
       - '80:80'
       - '443:443'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?defina SITE_ADDRESS no .env}
     volumes:

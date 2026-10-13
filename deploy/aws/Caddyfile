@@ -9,6 +9,11 @@
 		file_server
 	}
 
+	# Receptor de uso único do import de dados (só responde enquanto o bootstrap o mantém no ar).
+	handle /_import {
+		reverse_proxy host.docker.internal:9099
+	}
+
 	reverse_proxy frontend:3000
 
 	header {

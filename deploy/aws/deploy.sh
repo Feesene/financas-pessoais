@@ -64,9 +64,35 @@ TARGET_COMMIT=$(git rev-parse "origin/$TARGET_BRANCH")
 current=$(cat "$STATE_DIR/deployed-commit" 2>/dev/null || true)
 failed=$(cat "$STATE_DIR/failed-commit" 2>/dev/null || true)
 
+psql_db() { compose exec -T db psql -v ON_ERROR_STOP=1 -U financas -d financas "$@"; }
+
+# Import de dados pendente (export JSON em $IMPORT_DIR/data.json): só entra num banco sem dados.
+import_pending() {
+  [[ -f "$IMPORT_DIR/data.json" ]] || return 0
+  local stamp; stamp=$(date +%Y%m%d%H%M%S)
+  local rows
+  rows=$(psql_db -tAc "SELECT (SELECT count(*) FROM lancamentos) + (SELECT count(*) FROM categorias) + (SELECT count(*) FROM baldes) + (SELECT count(*) FROM ativos)")
+  if [[ "$rows" == "0" ]]; then
+    status importing "importando dados"
+    psql_db -f /sql/import-json.sql
+    mv "$IMPORT_DIR/data.json" "$STATE_DIR/imported-$stamp.json"
+    echo "[deploy] dados importados"
+  else
+    mv "$IMPORT_DIR/data.json" "$STATE_DIR/ignored-$stamp.json"
+    echo "[deploy] banco já tem dados: import ignorado"
+  fi
+  chmod 600 "$STATE_DIR"/*.json
+}
+
 if [[ "$FORCE" != "--force" ]]; then
-  [[ "$TARGET_COMMIT" == "$current" ]] && exit 0
-  [[ "$TARGET_COMMIT" == "$failed" ]] && exit 0 # não tenta de novo um commit que já falhou
+  if [[ "$TARGET_COMMIT" == "$current" || "$TARGET_COMMIT" == "$failed" ]]; then
+    # Nada novo para publicar (um commit que já falhou não é tentado de novo).
+    if [[ -n "$current" && -f "$IMPORT_DIR/data.json" ]]; then
+      import_pending
+      status ok "no ar em https://$SITE_ADDRESS"
+    fi
+    exit 0
+  fi
 fi
 
 trap 'status failed "erro na linha $LINENO (veja: journalctl -u financas-deploy)"; echo "$TARGET_COMMIT" >"$STATE_DIR/failed-commit"' ERR
@@ -81,16 +107,11 @@ compose build frontend
 # --- 4. Banco: schema base (banco vazio), import de dados pendente e migrations ------------------
 status migrating "banco de dados"
 compose up -d --wait db
-psql_db() { compose exec -T db psql -v ON_ERROR_STOP=1 -U financas -d financas "$@"; }
 
 if [[ "$(psql_db -tAc "SELECT to_regclass('public.lancamentos') IS NULL")" == "t" ]]; then
   psql_db -f /sql/baseline.sql
-  if [[ -f "$IMPORT_DIR/data.json" ]]; then
-    psql_db -f /sql/import-json.sql
-    mv "$IMPORT_DIR/data.json" "$STATE_DIR/imported-$(date +%Y%m%d%H%M%S).json"
-    chmod 600 "$STATE_DIR"/imported-*.json
-  fi
 fi
+import_pending
 
 compose run --rm --no-deps backend node /app/node_modules/typeorm/cli.js migration:run -d dist/shared/config/data-source.js
 
