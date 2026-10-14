@@ -72,8 +72,8 @@ cat >/etc/systemd/system/financas-deploy.timer <<UNIT
 Description=financas-pessoais: verifica deploy a cada 2 minutos
 
 [Timer]
-OnBootSec=1min
-OnUnitInactiveSec=2min
+# OnCalendar dispara sempre; OnUnitInactiveSec nunca dispararia, porque o primeiro deploy roda fora do systemd.
+OnCalendar=*:0/2
 
 [Install]
 WantedBy=timers.target

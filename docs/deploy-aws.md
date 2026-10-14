@@ -1,8 +1,12 @@
 # Guia de deploy — AWS Lightsail (servidor único)
 
 Alternativa ao [deploy Vercel + Supabase](./deploy.md): o app inteiro (frontend, backend e Postgres) roda num
-**servidor AWS Lightsail** com Docker Compose, em `us-east-1`. Os dois ambientes podem ficar no ar em paralelo:
-cada um tem o próprio banco.
+**servidor AWS Lightsail** com Docker Compose. Os dois ambientes podem ficar no ar em paralelo: cada um tem o
+próprio banco.
+
+Instância atual: `linux-aws-lightsail` (micro, Ubuntu 24.04), região **`us-east-2` (Ohio)**, IP estático
+`financas-pessoais-ip`. A região é `us-east-2` porque a conta AWS foi criada como projeto do programa
+"Just Ship It", cujas políticas da organização só liberam essa região (e negam App Runner e criação de buckets S3).
 
 ## Arquitetura
 
@@ -33,7 +37,7 @@ Browser ─HTTPS─> Caddy (80/443, certificado Let's Encrypt automático)
 Igual à Vercel: **mergeou o PR na `main`, o servidor publica sozinho**, em até ~2 minutos para detectar e mais
 alguns minutos de build.
 
-1. O timer `financas-deploy.timer` roda o `deploy.sh` a cada 2 minutos.
+1. O timer `financas-deploy.timer` roda o `deploy.sh` a cada 2 minutos (`OnCalendar=*:0/2`).
 2. Se `origin/main` tem um commit novo: build das imagens → migrations do TypeORM → `docker compose up -d`.
 3. Se o build ou as migrations falharem, **os containers antigos continuam no ar**. O commit com falha não é
    tentado de novo; o próximo commit na `main` dispara nova tentativa.
@@ -45,7 +49,7 @@ o GitHub Actions. Enquanto o PR que criou este deploy não for mergeado, o servi
 
 ## Criar o servidor do zero
 
-1. Lightsail → **Create instance** → região `us-east-1` → **Linux/Unix → OS Only → Ubuntu 24.04** → plano
+1. Lightsail → **Create instance** → região `us-east-2` (ou a que a conta permitir) → **Linux/Unix → OS Only → Ubuntu 24.04** → plano
    **micro (1 GB, US$ 7/mês)**.
 2. Em **Launch script**, cole o conteúdo de [`lightsail-launch.sh`](../deploy/aws/lightsail-launch.sh). Para migrar
    dados, preencha `IMPORT_TOKEN` com um segredo aleatório (veja **Import de dados** abaixo).
