@@ -26,8 +26,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules node_modules
-COPY --from=builder /app/shared/package.json shared/
-COPY --from=builder /app/shared/dist shared/dist
+# Os pacotes do monorepo em node_modules são symlinks (../../shared etc.). Para não depender de como o
+# builder copia links, o `shared` entra como diretório real e os demais links são removidos.
+RUN rm -rf node_modules/@financas-pessoais
+COPY --from=builder /app/shared/package.json node_modules/@financas-pessoais/shared/package.json
+COPY --from=builder /app/shared/dist node_modules/@financas-pessoais/shared/dist
 COPY --from=builder /app/backend/package.json backend/
 COPY --from=builder /app/backend/dist backend/dist
 WORKDIR /app/backend

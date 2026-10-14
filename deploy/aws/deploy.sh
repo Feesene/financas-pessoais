@@ -121,6 +121,13 @@ compose run --rm --no-deps backend node /app/node_modules/typeorm/cli.js migrati
 compose up -d --remove-orphans
 docker image prune -f >/dev/null
 
+# Confere que o backend ficou de pé (sem reinícios); senão o deploy é marcado como falho.
+sleep 20
+if [[ "$(docker inspect -f '{{.State.Running}} {{.RestartCount}}' financas-backend-1)" != "true 0" ]]; then
+  docker logs --tail 30 financas-backend-1
+  false
+fi
+
 echo "$TARGET_COMMIT" >"$STATE_DIR/deployed-commit"
 rm -f "$STATE_DIR/failed-commit"
 status ok "no ar em https://$SITE_ADDRESS"
