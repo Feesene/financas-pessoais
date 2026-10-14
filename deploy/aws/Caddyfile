@@ -1,0 +1,25 @@
+# HTTPS automático (Let's Encrypt). SITE_ADDRESS = domínio próprio ou <ip-com-hifens>.sslip.io,
+# que resolve para o IP do servidor sem precisar comprar domínio.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# Estado do último deploy (commit, horário, resultado) — sem segredos.
+	handle_path /_deploy/* {
+		root * /srv/status
+		file_server
+	}
+
+	# Receptor de uso único do import de dados (só responde enquanto o bootstrap o mantém no ar).
+	handle /_import {
+		reverse_proxy host.docker.internal:9099
+	}
+
+	reverse_proxy frontend:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

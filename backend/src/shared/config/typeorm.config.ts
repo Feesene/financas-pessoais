@@ -8,7 +8,10 @@ export function buildTypeOrmConfig(config: ConfigService): TypeOrmModuleOptions 
 
   if (databaseType === 'postgres') {
     const nodeEnv = config.get<string>('NODE_ENV');
-    const sslEnabled = config.get<string>('DATABASE_SSL') === 'true' || nodeEnv === 'production';
+    // DATABASE_SSL explícito vence; sem ele, TLS liga em produção (Supabase). O Postgres local do
+    // servidor AWS (rede interna do Docker) não tem TLS e usa DATABASE_SSL=false.
+    const sslFlag = config.get<string>('DATABASE_SSL');
+    const sslEnabled = sslFlag ? sslFlag === 'true' : nodeEnv === 'production';
     const poolMax = Number(config.get<string>('DATABASE_POOL_MAX')) || 1;
 
     return {

@@ -53,6 +53,7 @@ priorização do MVP e o backlog também estão lá.
 - [Fluxo Spec Driven e priorização](./docs/README.md)
 - [Backlog (fora do MVP)](./docs/BACKLOG.md)
 - [Deploy na nuvem (Vercel + Supabase)](./docs/deploy.md)
+- [Deploy na AWS (Lightsail + Docker)](./docs/deploy-aws.md)
 
 ## Escopo do MVP
 

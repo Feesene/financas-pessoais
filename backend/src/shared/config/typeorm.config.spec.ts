@@ -30,6 +30,19 @@ describe('buildTypeOrmConfig — branch postgres', () => {
     expect(config).toMatchObject({ ssl: { rejectUnauthorized: false } });
   });
 
+  it('desliga SSL em produção quando DATABASE_SSL=false (Postgres local sem TLS)', () => {
+    const config = buildTypeOrmConfig(
+      fakeConfig({
+        DATABASE_TYPE: 'postgres',
+        DATABASE_URL: baseUrl,
+        NODE_ENV: 'production',
+        DATABASE_SSL: 'false',
+      }),
+    );
+
+    expect(config).toMatchObject({ ssl: false, synchronize: false });
+  });
+
   it('aplica o pool máximo de DATABASE_POOL_MAX (default 1)', () => {
     const comDefault = buildTypeOrmConfig(
       fakeConfig({ DATABASE_TYPE: 'postgres', DATABASE_URL: baseUrl }),
