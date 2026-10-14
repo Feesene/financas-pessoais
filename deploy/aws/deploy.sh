@@ -121,9 +121,17 @@ compose run --rm --no-deps backend node /app/node_modules/typeorm/cli.js migrati
 compose up -d --remove-orphans
 docker image prune -f >/dev/null
 
-# Confere que o backend ficou de pé (sem reinícios); senão o deploy é marcado como falho.
-sleep 20
-if [[ "$(docker inspect -f '{{.State.Running}} {{.RestartCount}}' financas-backend-1)" != "true 0" ]]; then
+# Confere que a API responde de verdade (e alcança o banco); senão o deploy é marcado como falho.
+backend_ok() {
+  compose exec -T backend node -e \
+    "fetch('http://localhost:3001/health/keepalive').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))" \
+    >/dev/null 2>&1
+}
+for _ in $(seq 30); do
+  backend_ok && break
+  sleep 3
+done
+if ! backend_ok; then
   docker logs --tail 30 financas-backend-1
   false
 fi

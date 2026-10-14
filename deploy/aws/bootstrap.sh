@@ -34,8 +34,9 @@ apt-get install -y -q docker.io docker-compose-v2 docker-buildx git curl
 systemctl enable --now docker
 
 # 3. Código.
+# Código público: clone com permissões normais (o umask 077 acima é para segredos e dados).
 if [[ ! -d "$APP_DIR/repo/.git" ]]; then
-  git clone --quiet --branch "$BOOTSTRAP_BRANCH" "$REPO_URL" "$APP_DIR/repo"
+  (umask 022 && git clone --quiet --branch "$BOOTSTRAP_BRANCH" "$REPO_URL" "$APP_DIR/repo")
 fi
 
 # 4. Segredos gerados NO servidor (nunca saem dele). A senha de login fica em /opt/financas/.env.

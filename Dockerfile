@@ -17,6 +17,10 @@ COPY tsconfig.base.json ./
 COPY shared shared
 COPY backend backend
 COPY frontend frontend
+# O COPY preserva as permissões do checkout. Num clone feito com umask 077 (como o do bootstrap), os
+# arquivos chegariam como 600 de root e o usuário `node` não leria os package.json nas imagens finais.
+RUN chmod a+r package.json package-lock.json tsconfig.base.json \
+  && find shared backend frontend -path '*/node_modules' -prune -o -exec chmod a+rX {} +
 # Limita o heap do Node: o servidor tem 1 GB de RAM (+ swap).
 RUN NODE_OPTIONS=--max-old-space-size=1536 npm run build:workspaces \
   && npm prune --omit=dev --no-audit --no-fund
